@@ -1,0 +1,5575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARSIP DIGITAL PTLK</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root{--navy:#173f63;--blue:#256b9a;--bg:#f3f6fa;--line:#dce4ec;--text:#203040;--muted:#64748b;--white:#fff;--green:#16845b;--orange:#b7791f;--red:#b83232}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.5 Arial,Helvetica,sans-serif;color:var(--text)}
+    header{background:linear-gradient(120deg,#153c5c,#246b98);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    header h1{font-size:26px;margin:0 0 4px}header p{margin:0;color:#dbeafe}.head-actions{display:flex;gap:8px;flex-wrap:wrap}
+    main{max-width:1500px;margin:20px auto;padding:0 18px 36px}.identity{font-size:12px;color:#e2e8f0;margin-top:5px}
+    .panel{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(15,40,65,.04)}
+    .panel h2{font-size:20px;margin:0 0 14px;color:var(--navy)}.panel h3{font-size:14px;margin:12px 0 8px;color:var(--navy)}
+    .filters{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:12px;align-items:end}.field label{display:block;font-size:12px;font-weight:bold;color:#475569;margin-bottom:5px}
+    input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:9px 10px;background:#fff;color:var(--text);font:inherit}textarea{min-height:70px;resize:vertical}
+    button{border:0;border-radius:7px;padding:9px 13px;background:var(--blue);color:#fff;font-weight:bold;cursor:pointer;font:inherit}button:hover{filter:brightness(.95)}button:disabled{opacity:.55;cursor:wait}.secondary{background:#e7eef5;color:#1e4566}.success{background:var(--green)}.warning{background:var(--orange)}.danger{background:var(--red)}.small{padding:6px 9px;font-size:12px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cards{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:12px}.stat{background:#f8fbfd;border:1px solid var(--line);border-radius:10px;padding:14px}.stat .num{font-size:26px;font-weight:bold;color:var(--navy)}.stat .cap{font-size:12px;color:var(--muted)}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.bar-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(90px,2fr) 45px;gap:9px;align-items:center;margin:8px 0;font-size:12px}.bar-track{height:10px;background:#edf2f7;border-radius:8px;overflow:hidden}.bar-fill{height:100%;background:#3985b4;border-radius:8px}.bar-val{text-align:right;font-weight:bold}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:9px 10px;border-bottom:1px solid #e7edf3;text-align:left;vertical-align:top}th{background:#edf4f9;color:#254c6b;font-size:12px;position:sticky;top:0}td{font-size:12px}tr:last-child td{border-bottom:0}.muted{color:var(--muted)}.status{display:inline-block;border-radius:20px;padding:3px 8px;background:#edf2f7;font-size:11px;font-weight:bold}.status.TERVERIFIKASI{background:#dff5e9;color:#12633f}.status.DISETUJUI{background:#dff5e9;color:#12633f}.status.DIAJUKAN{background:#e4f0ff;color:#1d4f91}.status.DRAF{background:#edf2f7;color:#475569}.status.DITOLAK{background:#fde8e8;color:#9b2525}.status.PERLU{background:#fff3d6;color:#8a5a08}
+    .message{padding:10px 12px;border-radius:8px;margin:10px 0;display:none;white-space:pre-wrap}.message.show{display:block}.message.error{background:#fff0f0;color:#9b2525;border:1px solid #f1c5c5}.message.ok{background:#e9f8ef;color:#17613d;border:1px solid #b9e5ca}.loading{color:var(--muted);padding:12px 0}.hidden{display:none!important}.edit-grid{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:10px}.footer{text-align:center;color:#718096;font-size:12px;padding:18px}
+    @media(max-width:950px){.filters{grid-template-columns:repeat(2,minmax(140px,1fr))}.cards{grid-template-columns:repeat(2,minmax(120px,1fr))}.two{grid-template-columns:1fr}}
+    @media(max-width:560px){header{padding:16px}.filters,.edit-grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(110px,1fr))}main{padding:0 10px 25px}.panel{padding:13px}}
+  </style>
+</head>
+<body>
+  <div id="areaData" style="padding:15px;"></div>
+<div class="container">
+<header>
+  <div>
+    <h1>ARSIP DIGITAL PTLK</h1>
+    <p>Dinas Kebudayaan Provinsi Sulawesi Tengah</p>
+    <div class="identity" id="identitasPengguna">Memuat identitas pengguna...</div>
+  </div>
+  <div class="head-actions">
+    <button class="secondary" onclick="muatAnalitik()">Perbarui Ringkasan</button>
+    <button class="danger" id="tombolKeluar" onclick="keluarDashboard()">Keluar</button>
+    <button type="button" class="success" onclick="togglePanelImporPTLK()">Impor Data PTLK</button>
+<button
+  type="button"
+  onclick="bukaFormInputProgramPTLK()">
+  Input Program PTLK
+</button>
+  </div>
+</header>
+<main>
+  <div id="pesanGlobal" class="message"></div>
+  <section class="panel">
+    <h2>Filter Analitik</h2>
+    <div class="filters">
+      <div class="field"><label for="filterTahun">Tahun input</label><select id="filterTahun"><option value="">Semua tahun</option></select></div>
+      <div class="field"><label for="filterWilayah">Kabupaten/kota</label><select id="filterWilayah"><option value="">Semua kabupaten/kota</option></select></div>
+      <div class="field"><label for="filterOPK">Objek Pemajuan Kebudayaan</label><select id="filterOPK"><option value="">Semua OPK</option></select></div>
+      <div class="field"><label for="filterStatus">Status verifikasi</label><select id="filterStatus"><option value="">Semua status</option></select></div>
+      <div class="field"><label for="filterJenis">Jenis data</label><select id="filterJenis"><option value="">Tenaga dan lembaga</option><option value="TENAGA">Tenaga</option><option value="LEMBAGA">Lembaga</option></select></div>
+    </div>
+    <div class="actions"><button onclick="terapkanFilter()">Terapkan Filter Data</button><button class="secondary" onclick="resetFilter()">Reset Filter</button><button class="secondary" onclick="muatAnalitik()">Perbarui Ringkasan</button><button id="btnEksporExcel" onclick="eksporFilter('EXCEL')">Ekspor Excel</button><button id="btnEksporPDF" class="secondary" onclick="eksporFilter('PDF')">Ekspor PDF</button></div>
+    <div id="statusAnalitik" class="loading">Sedang memuat data analitik...</div>
+  </section>
+<section class="panel hidden" id="panelImporPTLK">
+    <h2>Impor Data PTLK dari Excel</h2>
+    <p class="muted">Impor terpisah ke masing-masing database. Sistem memeriksa struktur kolom, data wajib, format, dan duplikasi sebelum menyimpan. Data lama tidak ditimpa dan status verifikasi yang sudah ada tidak diubah.</p>
+    <div class="two">
+      <div class="stat" id="imporProgramCard"><h3>1. MASTER_PROGRAM_PTLK</h3><p class="muted">Program, kegiatan, subkegiatan, indikator, dan pagu.</p><div class="actions"><button type="button" class="secondary small" onclick="unduhTemplateImporPTLK('MASTER_PROGRAM_PTLK')">Unduh Template Program</button></div><input type="file" id="fileImporProgram" accept=".xlsx,.xls"><div class="actions"><button type="button" onclick="pratinjauImporPTLK('MASTER_PROGRAM_PTLK','fileImporProgram','hasilImporProgram')">Periksa & Pratinjau Program</button></div><div id="hasilImporProgram" class="message"></div></div>
+      <div class="stat" id="imporRencanaCard"><h3>2. RENCANA_KEGIATAN_PTLK</h3><p class="muted">Rencana baru otomatis berstatus DRAF dan mengikuti proses persetujuan normal.</p><div class="actions"><button type="button" class="secondary small" onclick="unduhTemplateImporPTLK('RENCANA_KEGIATAN_PTLK')">Unduh Template Rencana</button></div><input type="file" id="fileImporRencana" accept=".xlsx,.xls"><div class="actions"><button type="button" onclick="pratinjauImporPTLK('RENCANA_KEGIATAN_PTLK','fileImporRencana','hasilImporRencana')">Periksa & Pratinjau Rencana</button></div><div id="hasilImporRencana" class="message"></div></div>
+      <div class="stat"><h3>3. DATABASE_TENAGA</h3><p class="muted">Data tenaga kebudayaan. Identitas dan kolom verifikasi dikelola aplikasi.</p><div class="actions"><button type="button" class="secondary small" onclick="unduhTemplateImporPTLK('DATABASE_TENAGA')">Unduh Template Tenaga</button></div><input type="file" id="fileImporTenaga" accept=".xlsx,.xls"><div class="actions"><button type="button" onclick="pratinjauImporPTLK('DATABASE_TENAGA','fileImporTenaga','hasilImporTenaga')">Periksa & Pratinjau Tenaga</button></div><div id="hasilImporTenaga" class="message"></div></div>
+      <div class="stat"><h3>4. DATABASE_LEMBAGA</h3><p class="muted">Data lembaga kebudayaan. Identitas dan kolom verifikasi dikelola aplikasi.</p><div class="actions"><button type="button" class="secondary small" onclick="unduhTemplateImporPTLK('DATABASE_LEMBAGA')">Unduh Template Lembaga</button></div><input type="file" id="fileImporLembaga" accept=".xlsx,.xls"><div class="actions"><button type="button" onclick="pratinjauImporPTLK('DATABASE_LEMBAGA','fileImporLembaga','hasilImporLembaga')">Periksa & Pratinjau Lembaga</button></div><div id="hasilImporLembaga" class="message"></div></div>
+    </div>
+    <p class="muted" style="margin-top:12px">Setiap proses menampilkan jumlah valid, duplikat, dan tidak valid sebelum konfirmasi. Tidak ada penghapusan atau penimpaan data lama.</p>
+    <div class="actions"><button type="button" class="secondary" onclick="togglePanelImporPTLK()">Tutup Menu Impor</button></div>
+  </section>
+
+  <section class="panel" id="panelUjiKoneksiPerencanaanPTLK">
+  <h2>Uji Koneksi Modul Perencanaan PTLK</h2>
+  <p class="muted">
+    Pengujian pembacaan indikator, target tahunan, program,
+    dan wilayah tanpa mengubah database.
+  </p>
+  <div class="actions">
+    <button type="button" id="btnUjiReferensi" onclick="toggleUjiReferensiPTLK()">
+      Uji Referensi Perencanaan
+    </button>
+    <button type="button" onclick="ujiDaftarKegiatanDisetujuiPTLK()">
+  Uji Daftar Kegiatan Disetujui
+</button>
+<button
+  type="button"
+  id="btnUjiRealisasi"
+  style="
+    width:170px;
+    min-width:170px;
+    max-width:170px;
+    flex:0 0 170px;
+    white-space:nowrap;
+  "
+  onclick="toggleUjiRealisasi()">
+  Uji Baca Realisasi
+</button>
+</div>
+
+<pre id="hasilUjiPelaksanaan" style="
+  display:none;
+  width:100%;
+  box-sizing:border-box;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  background:#f5f5f5;
+  padding:12px;
+  border-radius:8px;
+  max-height:400px;
+  overflow:auto;
+  margin-top:10px;
+"></pre>
+<pre
+  id="hasilUjiBacaRealisasi"
+  style="
+    display:none;
+    width:100%;
+    max-width:100%;
+    max-height:300px;
+    overflow:auto;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    box-sizing:border-box;
+    padding:12px;
+    margin-top:12px;
+    background:#f5f7fa;
+    border:1px solid #dce2e8;
+    border-radius:8px;
+  "></pre>
+  </div>
+  <pre id="hasilUjiReferensi" class="hidden"
+       style="white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;padding:12px;border-radius:8px">Belum diuji.</pre>
+</section>
+
+
+<section class="panel" id="panelPelaksanaanRealisasiPTLK">
+  <h2>Pelaksanaan dan Realisasi Kegiatan PTLK</h2>
+  <p class="muted">
+    Pencatatan pelaksanaan, realisasi fisik dan keuangan,
+    serta pembacaan laporan kegiatan yang telah disetujui.
+  </p>
+
+  
+<div class="form-group">
+  <label for="pelaksanaanIdKegiatan">Pilih Kegiatan</label>
+  <select id="pelaksanaanIdKegiatan">
+    <option value="">Klik Muat Daftar Kegiatan</option>
+  </select>
+
+  <button type="button"
+    onclick="muatPilihanKegiatanPelaksanaanPTLK()">
+    Muat Daftar Kegiatan
+  </button>
+</div>
+
+
+  <div class="form-group">
+    <label for="pelaksanaanStatus">Status Pelaksanaan</label>
+    <select id="pelaksanaanStatus">
+      <option value="BELUM DIMULAI">Belum Dimulai</option>
+      <option value="BERJALAN">Berjalan</option>
+      <option value="SELESAI">Selesai</option>
+      <option value="TERHENTI">Terhenti</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanOutput">Output Realisasi</label>
+    <input type="number" id="pelaksanaanOutput" min="0" step="any">
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanAnggaran">Anggaran Realisasi (Rp)</label>
+    <input type="number" id="pelaksanaanAnggaran" min="0">
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanFisik">Persentase Fisik (%)</label>
+    <input type="number" id="pelaksanaanFisik" min="0" max="100">
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanKeuangan">Persentase Keuangan (%)</label>
+    <input type="number" id="pelaksanaanKeuangan" min="0" max="100">
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanTanggal">Tanggal Laporan</label>
+    <input type="date" id="pelaksanaanTanggal">
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanBukti">Tautan Bukti/Dokumentasi</label>
+    <input type="url" id="pelaksanaanBukti">
+  </div>
+
+  <div class="form-group">
+    <label for="pelaksanaanCatatan">Catatan</label>
+    <textarea id="pelaksanaanCatatan"></textarea>
+  </div>
+
+  <div class="actions">
+    <button type="button" onclick="simpanRealisasiDashboardPTLK()">
+      Simpan Realisasi
+    </button>
+    <button type="button" onclick="muatRealisasiDashboardPTLK()">
+      Tampilkan Realisasi
+    </button>
+  </div>
+
+  <p id="statusPelaksanaanRealisasi" class="muted"></p>
+  <pre id="hasilPembacaanRealisasi"
+       style="white-space:pre-wrap;overflow:auto;"></pre>
+
+</section>
+
+  <section class="panel" id="panelDaftarSeluruhRencana">
+    <h2>Daftar Seluruh Rencana Kegiatan PTLK</h2>
+    <p class="muted">Pemantauan seluruh rencana kegiatan, termasuk DRAF, DIAJUKAN, DISETUJUI, dan DITOLAK. Panel ini hanya untuk melihat data dan tidak mengubah keputusan persetujuan.</p>
+    <div class="filters" style="grid-template-columns:repeat(4,minmax(150px,1fr))">
+      <div class="field"><label for="filterSemuaRencanaStatus">Status persetujuan</label><select id="filterSemuaRencanaStatus"><option value="">Semua status</option><option value="DRAF">DRAF</option><option value="DIAJUKAN">DIAJUKAN</option><option value="DISETUJUI">DISETUJUI</option><option value="DITOLAK">DITOLAK</option></select></div>
+      <div class="field"><label for="filterSemuaRencanaTahun">Tahun</label><select id="filterSemuaRencanaTahun"><option value="">Semua tahun</option></select></div>
+      <div class="field"><label for="filterSemuaRencanaWilayah">Kabupaten/Kota</label><select id="filterSemuaRencanaWilayah"><option value="">Semua kabupaten/kota</option></select></div>
+      <div class="field"><label for="cariSemuaRencana">Cari kegiatan / ID</label><input id="cariSemuaRencana" type="search" placeholder="Ketik nama kegiatan atau ID..."></div>
+    </div>
+    <div class="actions"><button type="button" onclick="muatDaftarSeluruhRencanaPTLK()">Perbarui Daftar Seluruh Rencana</button><button type="button" class="secondary" onclick="resetFilterSeluruhRencanaPTLK()">Reset Filter</button></div>
+    <div class="cards" style="margin:12px 0">
+      <div class="stat"><div class="num" id="jumlahSemuaRencana">0</div><div class="cap">Total rencana</div></div>
+      <div class="stat"><div class="num" id="jumlahRencanaDraf">0</div><div class="cap">Draf</div></div>
+      <div class="stat"><div class="num" id="jumlahRencanaDiajukan">0</div><div class="cap">Menunggu persetujuan</div></div>
+      <div class="stat"
+     role="button"
+     tabindex="0"
+     title="Klik untuk melihat daftar kegiatan yang disetujui"
+     style="cursor:pointer"
+     onclick="tampilkanRencanaStatusPTLK('DISETUJUI')"
+     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();tampilkanRencanaStatusPTLK('DISETUJUI')}">
+  <div class="stat"
+     onclick="tampilkanRencanaStatusPTLK('DISETUJUI')"
+     style="cursor:pointer"
+     title="Klik untuk melihat kegiatan yang disetujui">
+  <div class="num" id="jumlahRencanaDisetujui">0</div>
+  <div class="cap">Disetujui — Klik untuk melihat daftar</div>
+</div>
+      <div class="stat"><div class="num" id="jumlahRencanaDitolak">0</div><div class="cap">Ditolak</div></div>
+    </div>
+    <div id="statusDaftarSeluruhRencana" class="loading">Daftar seluruh rencana belum dimuat.</div>
+    <div class="table-wrap"><table><thead><tr><th>ID Kegiatan</th><th>Tahun</th><th>Nama Kegiatan</th><th>Kabupaten/Kota</th><th>Anggaran Rencana</th><th>Status Persetujuan</th><th>Status Pelaksanaan</th><th>Aksi</th></tr></thead><tbody id="tabelDaftarSeluruhRencana"><tr><td colspan="8" class="muted">Belum ada data ditampilkan.</td></tr></tbody></table></div>
+    <div id="detailDaftarSeluruhRencana" class="panel hidden" style="margin-top:14px;background:#f8fbfd">
+      <h3>Detail Rencana Kegiatan</h3>
+      <div id="isiDetailDaftarSeluruhRencana" class="detail-box"></div>
+      <div class="actions"><button type="button" class="secondary" onclick="tutupDetailDaftarSeluruhRencana()">Tutup Detail</button></div>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="panelPersetujuanRencana">
+    <h2>Panel Persetujuan Rencana Kegiatan PTLK</h2>
+    <p class="muted">Daftar rencana kegiatan yang telah diajukan dan menunggu pemeriksaan serta keputusan Admin Utama atau Operator Verifikator.</p>
+    <div class="actions">
+      <button type="button" onclick="muatDaftarPersetujuanRencana()">Perbarui Daftar Pengajuan</button>
+    </div>
+    <div id="statusPersetujuanRencana" class="loading">Memuat daftar pengajuan...</div>
+    <div class="table-wrap">
+      <table><thead><tr><th>ID Kegiatan</th><th>Tahun</th><th>Nama Kegiatan</th><th>Kabupaten/Kota</th><th>Anggaran Rencana</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody id="tabelPersetujuanRencana"><tr><td colspan="7" class="muted">Daftar belum dimuat.</td></tr></tbody></table>
+    </div>
+    <div id="detailPersetujuanRencana" class="panel hidden" style="margin-top:14px;background:#f8fbfd">
+      <h3>Detail Rencana Kegiatan</h3>
+      <div id="isiDetailPersetujuanRencana" class="detail-box"></div>
+      <div class="field" style="margin-top:12px">
+        <label for="catatanPersetujuanRencana">Catatan verifikator (wajib untuk penolakan)</label>
+        <textarea id="catatanPersetujuanRencana" placeholder="Tuliskan catatan pemeriksaan atau alasan penolakan..."></textarea>
+      </div>
+      <div class="actions">
+        <button type="button" class="success" id="btnSetujuiRencana" onclick="putuskanRencanaPTLK('DISETUJUI')">Setujui Rencana</button>
+        <button type="button" class="danger" id="btnTolakRencana" onclick="putuskanRencanaPTLK('DITOLAK')">Tolak Rencana</button>
+        <button type="button" class="secondary" onclick="tutupDetailPersetujuanRencana()">Tutup Detail</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="panelRencanaDitolak">
+    <h2>Panel Rencana Kegiatan Ditolak</h2>
+    <p class="muted">Panel ini digunakan Admin Utama dan Operator Pengelola/Pengolah Data untuk membaca alasan penolakan, memperbaiki rencana, lalu mengajukannya kembali.</p>
+    <div class="actions">
+      <button type="button" onclick="muatDaftarRencanaDitolak()">Perbarui Daftar Rencana Ditolak</button>
+    </div>
+    <div id="statusRencanaDitolak" class="loading">Memuat daftar rencana ditolak...</div>
+    <div class="table-wrap">
+      <table><thead><tr><th>ID Kegiatan</th><th>Tahun</th><th>Nama Kegiatan</th><th>Kabupaten/Kota</th><th>Anggaran Rencana</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody id="tabelRencanaDitolak"><tr><td colspan="7" class="muted">Daftar belum dimuat.</td></tr></tbody></table>
+    </div>
+    <div id="editorRencanaDitolak" class="panel hidden" style="margin-top:14px;background:#f8fbfd">
+      <h3>Detail Penolakan dan Perbaikan Rencana</h3>
+      <div id="ringkasanRencanaDitolak" class="detail-box"></div>
+      <div class="field" style="margin:12px 0">
+        <label>Alasan penolakan / riwayat catatan verifikator (tidak dapat diubah)</label>
+        <div id="alasanPenolakanRencana" style="white-space:pre-wrap;background:#fff;border:1px solid #dce4ec;border-radius:7px;padding:10px;min-height:48px"></div>
+      </div>
+      <h3>Form Perbaikan Rencana</h3>
+      <div class="edit-grid">
+        <div class="field"><label for="revNamaKegiatan">Nama Kegiatan</label><input id="revNamaKegiatan" type="text"></div>
+        <div class="field"><label for="revKabupaten">Kabupaten/Kota</label><select id="revKabupaten">
+          <option value="">Pilih kabupaten/kota</option>
+          <option>KOTA PALU</option><option>KABUPATEN DONGGALA</option><option>KABUPATEN SIGI</option><option>KABUPATEN PARIGI MOUTONG</option><option>KABUPATEN POSO</option><option>KABUPATEN TOJO UNA-UNA</option><option>KABUPATEN BANGGAI</option><option>KABUPATEN BANGGAI KEPULAUAN</option><option>KABUPATEN BANGGAI LAUT</option><option>KABUPATEN MOROWALI</option><option>KABUPATEN MOROWALI UTARA</option><option>KABUPATEN TOLITOLI</option><option>KABUPATEN BUOL</option>
+        </select></div>
+        <div class="field"><label for="revTujuan">Tujuan</label><textarea id="revTujuan"></textarea></div>
+        <div class="field"><label for="revSasaran">Sasaran</label><textarea id="revSasaran"></textarea></div>
+        <div class="field"><label for="revTargetOutput">Target Output</label><input id="revTargetOutput" type="number" min="0" step="any"></div>
+        <div class="field"><label for="revSatuan">Satuan</label><input id="revSatuan" type="text"></div>
+        <div class="field"><label for="revTargetPeserta">Target Peserta</label><input id="revTargetPeserta" type="number" min="0" step="1"></div>
+        <div class="field"><label for="revLokasi">Lokasi</label><input id="revLokasi" type="text"></div>
+        <div class="field"><label for="revTanggalMulai">Tanggal Mulai</label><input id="revTanggalMulai" type="date"></div>
+        <div class="field"><label for="revTanggalSelesai">Tanggal Selesai</label><input id="revTanggalSelesai" type="date"></div>
+        <div class="field"><label for="revPenanggungJawab">Penanggung Jawab</label><input id="revPenanggungJawab" type="text"></div>
+        <div class="field"><label for="revAnggaran">Anggaran Rencana (Rp)</label><input id="revAnggaran" type="number" min="0" step="1"></div>
+        <div class="field" style="grid-column:1/-1"><label for="revCatatan">Catatan perbaikan dari operator (opsional)</label><textarea id="revCatatan" placeholder="Jelaskan tindak lanjut atas catatan verifikator. Riwayat penolakan sebelumnya tetap disimpan."></textarea></div>
+      </div>
+      <div id="statusSimpanRevisi" class="loading"></div>
+      <div class="actions">
+        <button type="button" id="btnSimpanRevisiRencana" onclick="simpanRevisiRencanaDitolak()">Simpan Perbaikan sebagai Draf</button>
+        <button type="button" class="success" id="btnAjukanUlangRencana" onclick="ajukanUlangRencanaDitolak()" disabled>Ajukan Ulang Rencana</button>
+        <button type="button" class="secondary" onclick="tutupEditorRencanaDitolak()">Tutup</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Ringkasan Data</h2>
+    <div class="cards">
+      <div class="stat"><div class="num" id="totalTenaga">0</div><div class="cap">Total tenaga kebudayaan</div></div>
+      <div class="stat"><div class="num" id="totalLembaga">0</div><div class="cap">Total lembaga kebudayaan</div></div>
+      <div class="stat"><div class="num" id="totalData">0</div><div class="cap">Total data sesuai filter</div></div>
+      <div class="stat"><div class="num" id="tenagaVerif">0</div><div class="cap">Tenaga terverifikasi</div></div>
+      <div class="stat"><div class="num" id="lembagaVerif">0</div><div class="cap">Lembaga terverifikasi</div></div>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="panel"><h2>Persebaran Data per Kabupaten/Kota</h2><div id="rekapWilayah" class="muted">Belum ada data.</div></section>
+    <section class="panel"><h2>Rekapitulasi 10 OPK</h2><div id="rekapOPK" class="muted">Belum ada data.</div><p class="muted">Satu lembaga dapat dihitung pada beberapa OPK, tetapi tetap dihitung satu kali pada total lembaga.</p></section>
+  </div>
+  <section class="panel"><h2>Status Verifikasi</h2><div id="rekapStatus" class="muted">Belum ada data.</div></section>
+  <section class="panel">
+    <h2>Rincian Data Hasil Filter</h2>
+    <div class="table-wrap"><table><thead><tr><th>Jenis</th><th>Nama</th><th>Kabupaten/Kota</th><th>OPK</th><th>Status</th><th>Tahun</th></tr></thead><tbody id="tabelAnalitik"><tr><td colspan="6" class="muted">Memuat data...</td></tr></tbody></table></div>
+  </section>
+
+  <section class="panel" id="panelVerifikasiData">
+    <h2>Panel Verifikasi dan Perbaikan Data</h2>
+    <div class="filters" style="grid-template-columns:repeat(3,minmax(160px,1fr))">
+      <div class="field"><label for="jenisVerifikasi">Jenis data</label><select id="jenisVerifikasi"><option value="LEMBAGA">Lembaga</option><option value="TENAGA">Tenaga</option></select></div>
+      <div class="field"><label for="cariVerifikasi">Cari nama / wilayah / ID</label><input id="cariVerifikasi" placeholder="Ketik kata pencarian..."></div>
+      <div class="field"><label>&nbsp;</label><button onclick="muatVerifikasi()">Tampilkan Data Verifikasi</button></div>
+    </div>
+    <div id="statusVerifikasi" class="loading">Pilih jenis data lalu tampilkan.</div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama</th><th>Wilayah</th><th>OPK</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tabelVerifikasi"><tr><td colspan="6" class="muted">Belum ada data ditampilkan.</td></tr></tbody></table></div>
+    <div id="editorData" class="panel hidden" style="margin-top:14px;background:#f8fbfd">
+      <h3 id="judulEditor">Perbaiki Data</h3><div id="formEditor" class="edit-grid"></div>
+      <div class="actions"><button onclick="simpanEditData()">Simpan Perbaikan</button><button class="secondary" onclick="tutupEditor()">Batal</button></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panelOperator">
+    <h2>Manajemen Operator</h2>
+    <div id="formTambahOperator" class="edit-grid">
+      <div class="field"><label>Nama lengkap</label><input id="opNama" placeholder="Nama operator"></div>
+      <div class="field"><label>Email Google</label><input id="opEmail" type="email" placeholder="email@gmail.com"></div>
+      <div class="field"><label>Peran</label><select id="opPeran"><option>OPERATOR_VERIFIKATOR</option><option>OPERATOR_PENGELOLA_DATA</option><option>OPERATOR_LAPORAN</option><option>OPERATOR_KABKOTA</option></select></div>
+      <div class="field"><label>Penugasan</label><select id="opTugas"><option value="TENAGA,LEMBAGA">TENAGA,LEMBAGA</option><option value="TENAGA">TENAGA</option><option value="LEMBAGA">LEMBAGA</option></select></div>
+      <div class="field hidden" id="opWilayahWrap"><label>Wilayah tugas operator</label><select id="opWilayah"><option value="">Pilih kabupaten/kota</option><option value="KOTA PALU">KOTA PALU</option><option value="KABUPATEN DONGGALA">KABUPATEN DONGGALA</option><option value="KABUPATEN SIGI">KABUPATEN SIGI</option><option value="KABUPATEN PARIGI MOUTONG">KABUPATEN PARIGI MOUTONG</option><option value="KABUPATEN POSO">KABUPATEN POSO</option><option value="KABUPATEN TOJO UNA-UNA">KABUPATEN TOJO UNA-UNA</option><option value="KABUPATEN BANGGAI">KABUPATEN BANGGAI</option><option value="KABUPATEN BANGGAI KEPULAUAN">KABUPATEN BANGGAI KEPULAUAN</option><option value="KABUPATEN BANGGAI LAUT">KABUPATEN BANGGAI LAUT</option><option value="KABUPATEN MOROWALI">KABUPATEN MOROWALI</option><option value="KABUPATEN MOROWALI UTARA">KABUPATEN MOROWALI UTARA</option><option value="KABUPATEN TOLITOLI">KABUPATEN TOLITOLI</option><option value="KABUPATEN BUOL">KABUPATEN BUOL</option></select></div>
+    </div>
+    <div class="actions"><button onclick="tambahOperator()">Tambah Operator</button><button class="secondary" onclick="muatOperator()">Perbarui Daftar Operator</button></div>
+    <div id="statusOperator" class="loading"></div>
+    <div class="table-wrap"><table><thead><tr><th>Nama</th><th>Email</th><th>Peran</th><th>Penugasan</th><th>Wilayah Tugas</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tabelOperator"><tr><td colspan="7">Daftar operator belum dimuat.</td></tr></tbody></table></div>
+    <hr style="margin:24px 0;">
+<h3>Pengajuan Operator Kabupaten/Kota</h3>
+<p>Daftar calon operator yang menunggu persetujuan Admin Utama.</p>
+<div id="statusPengajuanOperator" class="loading">Daftar pengajuan belum dimuat.</div>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>NIP</th>
+        <th>Email</th>
+        <th>WhatsApp</th>
+        <th>Wilayah Diajukan</th>
+        <th>Tanggal Pengajuan</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="tabelPengajuanOperator">
+      <tr><td colspan="7">Belum ada data pengajuan.</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="actions">
+  <button class="secondary" onclick="muatPengajuanOperator()">Perbarui Pengajuan</button>
+</div>
+  </section>
+
+
+<section id="panelKelolaOperator" class="panel">
+  <h3>Kelola Operator Kabupaten/Kota</h3>
+  <p>Daftar operator yang sudah terdaftar di aplikasi. Admin Utama dapat menonaktifkan, memindahkan wilayah tugas, atau mencabut akses operator.</p>
+
+  <div id="statusKelolaOperator" class="loading">
+    Daftar operator belum dimuat.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Wilayah Tugas</th>
+          <th>Penugasan</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelKelolaOperator">
+        <tr><td colspan="6">Belum ada data operator.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="secondary" onclick="muatDaftarKelolaOperator()">
+      Perbarui Daftar Operator
+    </button>
+  </div>
+</section>
+
+
+<!-- MENU KHUSUS ADMIN UTAMA -->
+<button
+  type="button"
+  id="menuKelolaOperator"
+  class="secondary"
+  onclick="bukaPanelKelolaOperator()"
+  style="display:none;">
+  Kelola Operator Kabupaten/Kota
+</button>
+
+
+<section id="panelKelolaOperator" style="display:none;">
+  <h3>Kelola Operator Kabupaten/Kota</h3>
+  <p>
+    Admin Utama dapat melihat, memindahkan wilayah tugas,
+    menonaktifkan, mengaktifkan, dan menghapus akun operator.
+  </p>
+
+  <div id="statusKelolaOperator" class="loading">
+    Daftar operator belum dimuat.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Wilayah Tugas</th>
+          <th>Penugasan</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelKelolaOperator">
+        <tr><td colspan="6">Belum ada data operator.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="secondary"
+      type="button"
+      onclick="muatDaftarKelolaOperator()">
+      Perbarui Daftar Operator
+    </button>
+  </div>
+</section>
+
+
+<section class="panel hidden" id="panelPesertaKegiatan">
+  <h2>Pengelolaan Peserta Kegiatan PTLK</h2>
+  <p class="muted">
+    Mendaftarkan tenaga dan lembaga kebudayaan sebagai peserta
+    kegiatan yang telah disetujui serta mencatat kehadirannya.
+  </p>
+
+  <div class="edit-grid">
+    <div class="field">
+      <label for="pesertaPilihKegiatan">Kegiatan yang Disetujui</label>
+      <select id="pesertaPilihKegiatan">
+        <option value="">Memuat kegiatan...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="pesertaJenis">Jenis Peserta</label>
+      <select id="pesertaJenis" onchange="PTLK_PESERTA_ISI_SUMBER()">
+        <option value="TENAGA">Tenaga Kebudayaan</option>
+        <option value="LEMBAGA">Lembaga Kebudayaan</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="pesertaPilihSumber">Pilih Tenaga / Lembaga</label>
+      <select id="pesertaPilihSumber">
+        <option value="">Pilih peserta</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="pesertaPeran">Peran Peserta</label>
+      <input id="pesertaPeran" placeholder="Contoh: Peserta, Narasumber, Pendamping">
+    </div>
+
+    <div class="field" style="grid-column:1/-1">
+      <label for="pesertaKeterangan">Keterangan</label>
+      <textarea id="pesertaKeterangan" placeholder="Keterangan tambahan (opsional)"></textarea>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" onclick="PTLK_PESERTA_SIMPAN()">
+      Tambahkan Peserta
+    </button>
+    <button type="button" class="secondary" onclick="PTLK_PESERTA_MUAT_REFERENSI()">
+      Perbarui Data
+    </button>
+  </div>
+
+  <div id="statusPesertaKegiatan" class="loading">
+    Modul peserta belum dimuat.
+  </div>
+
+  <h3>Daftar Peserta Terdaftar</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nama Peserta</th>
+          <th>Jenis</th>
+          <th>Asal</th>
+          <th>Peran</th>
+          <th>Kehadiran</th>
+          <th>Keterangan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelPesertaKegiatan">
+        <tr>
+          <td colspan="7">Pilih kegiatan untuk melihat peserta.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- =====================================================
+     PANEL MONITORING DAN EVALUASI KEGIATAN PTLK
+     ===================================================== -->
+
+<section id="panelMonevKegiatan" class="hidden">
+
+  <div class="card">
+    <h2>MONITORING DAN EVALUASI KEGIATAN PTLK</h2>
+    <p>Pengelolaan monitoring, tindak lanjut, evaluasi, dan dokumentasi kegiatan PTLK.</p>
+    muatPilihanKegiatanMonevPTLK();
+    <label>Pilih Kegiatan</label>
+    <select id="monevKegiatanId">
+      <option value="">Memuat daftar kegiatan...</option>
+    </select>
+     
+    <div class="grid grid-cols-2 gap-2">
+      <button type="button" onclick="bukaSubPanelMonevPTLK('monitoring')">
+        Monitoring Kegiatan
+      </button>
+      <button type="button" onclick="bukaSubPanelMonevPTLK('tindakLanjut')">
+        Tindak Lanjut
+      </button>
+      <button type="button" onclick="bukaSubPanelMonevPTLK('evaluasi')">
+        Evaluasi Kegiatan
+      </button>
+      <button type="button" onclick="bukaSubPanelMonevPTLK('dokumentasi')">
+        Dokumentasi
+      </button>
+      <button type="button"
+        onclick="bukaPanelMonevKegiatanPTLK()">
+  Monev Kegiatan PTLK
+</button>
+    </div>
+  </div>
+
+  <!-- MONITORING -->
+  <div id="subMonevMonitoring" class="card hidden">
+    <h3>MONITORING KEGIATAN</h3>
+
+    <label>Tanggal Monitoring</label>
+    <input type="date" id="monTanggal">
+
+    <label>Petugas Monitoring</label>
+    <input type="text" id="monPetugas">
+
+    <label>Kemajuan Pelaksanaan</label>
+    <textarea id="monKemajuan"></textarea>
+
+    <label>Hasil Sementara</label>
+    <textarea id="monHasil"></textarea>
+
+    <label>Kendala</label>
+    <textarea id="monKendala"></textarea>
+
+    <label>Rekomendasi</label>
+    <textarea id="monRekomendasi"></textarea>
+
+    <label>Penanggung Jawab Tindak Lanjut</label>
+    <input type="text" id="monPIC">
+
+    <label>Batas Waktu Tindak Lanjut</label>
+    <input type="date" id="monBatas">
+
+    <label>Status Tindak Lanjut</label>
+    <select id="monStatus">
+      <option value="BELUM_DITINDAKLANJUTI">Belum Ditindaklanjuti</option>
+      <option value="DALAM_PROSES">Dalam Proses</option>
+      <option value="SELESAI">Selesai</option>
+    </select>
+
+    <label>Tautan Bukti/Dokumentasi</label>
+    <input type="url" id="monBukti">
+
+    <button type="button" onclick="simpanMonitoringKegiatanDashboardPTLK()">
+      Simpan Monitoring
+    </button>
+
+    <button type="button" onclick="muatMonitoringKegiatanDashboardPTLK()">
+      Tampilkan Data Monitoring
+    </button>
+
+    <p id="statusMonevMonitoring"></p>
+    <div id="daftarMonevMonitoring"></div>
+  </div>
+
+  <!-- TINDAK LANJUT -->
+  <div id="subMonevTindakLanjut" class="card hidden">
+    <h3>TINDAK LANJUT HASIL MONITORING</h3>
+
+    <label>ID Monitoring</label>
+    <select id="tlIdMonitoring">
+      <option value="">Pilih hasil monitoring</option>
+    </select>
+
+    <label>Uraian Rekomendasi</label>
+    <textarea id="tlUraian"></textarea>
+
+    <label>Rencana Tindakan</label>
+    <textarea id="tlRencana"></textarea>
+
+    <label>Penanggung Jawab (PIC)</label>
+    <input type="text" id="tlPIC">
+
+    <label>Tanggal Mulai</label>
+    <input type="date" id="tlTanggalMulai">
+
+    <label>Batas Waktu</label>
+    <input type="date" id="tlBatas">
+
+    <label>Status</label>
+    <select id="tlStatus">
+      <option value="BELUM_DIMULAI">Belum Dimulai</option>
+      <option value="DALAM_PROSES">Dalam Proses</option>
+      <option value="SELESAI">Selesai</option>
+    </select>
+
+    <label>Hasil Tindak Lanjut</label>
+    <textarea id="tlHasil"></textarea>
+
+    <label>Tautan Bukti</label>
+    <input type="url" id="tlBukti">
+
+    <button type="button" onclick="simpanTindakLanjutDashboardPTLK()">
+      Simpan Tindak Lanjut
+    </button>
+
+    <button type="button" onclick="muatTindakLanjutDashboardPTLK()">
+      Tampilkan Tindak Lanjut
+    </button>
+
+    <p id="statusMonevTindakLanjut"></p>
+    <div id="daftarMonevTindakLanjut"></div>
+  </div>
+
+  <!-- EVALUASI -->
+  <div id="subMonevEvaluasi" class="card hidden">
+    <h3>EVALUASI KEGIATAN</h3>
+
+    <label>Indikator</label>
+    <input type="text" id="evIndikator">
+
+    <label>Satuan</label>
+    <input type="text" id="evSatuan">
+
+    <label>Baseline</label>
+    <input type="number" id="evBaseline">
+
+    <label>Target</label>
+    <input type="number" id="evTarget" min="1">
+
+    <label>Realisasi</label>
+    <input type="number" id="evRealisasi" min="0">
+
+    <label>Analisis Capaian</label>
+    <textarea id="evAnalisis"></textarea>
+
+    <label>Hasil Outcome</label>
+    <textarea id="evOutcome"></textarea>
+
+    <label>Faktor Pendukung</label>
+    <textarea id="evPendukung"></textarea>
+
+    <label>Faktor Penghambat</label>
+    <textarea id="evPenghambat"></textarea>
+
+    <label>Rekomendasi</label>
+    <textarea id="evRekomendasi"></textarea>
+
+    <label>Tautan Bukti</label>
+    <input type="url" id="evBukti">
+
+    <label>Petugas Evaluasi</label>
+    <input type="text" id="evPetugas">
+
+    <label>Tanggal Evaluasi</label>
+    <input type="date" id="evTanggal">
+
+    <button type="button" onclick="simpanEvaluasiKegiatanDashboardPTLK()">
+      Simpan Evaluasi
+    </button>
+
+    <button type="button" onclick="muatEvaluasiKegiatanDashboardPTLK()">
+      Tampilkan Evaluasi
+    </button>
+
+    <p id="statusMonevEvaluasi"></p>
+    <div id="daftarMonevEvaluasi"></div>
+  </div>
+
+  <!-- DOKUMENTASI -->
+  <div id="subMonevDokumentasi" class="card hidden">
+    <h3>DOKUMENTASI KEGIATAN</h3>
+
+    <label>Jenis Dokumentasi</label>
+    <select id="docJenis">
+      <option value="FOTO">Foto</option>
+      <option value="VIDEO">Video</option>
+      <option value="DOKUMEN">Dokumen</option>
+      <option value="LAINNYA">Lainnya</option>
+    </select>
+
+    <label>Uraian Dokumentasi</label>
+    <textarea id="docUraian"></textarea>
+
+    <label>Tautan File</label>
+    <input type="url" id="docTautan">
+
+    <button type="button" onclick="simpanDokumentasiKegiatanDashboardPTLK()">
+      Simpan Dokumentasi
+    </button>
+
+    <button type="button" onclick="muatDokumentasiKegiatanDashboardPTLK()">
+      Tampilkan Dokumentasi
+    </button>
+
+    <p id="statusMonevDokumentasi"></p>
+    <div id="daftarMonevDokumentasi"></div>
+  </div>
+
+</section>
+
+
+<div class="actions">
+  <button type="button"
+    onclick="bukaPanelHibahPTLK('panelManajemenHibah')">
+    Manajemen Hibah
+  </button>
+
+  <button type="button"
+    onclick="bukaPanelHibahPTLK('panelPengajuanHibah')">
+    Pengajuan dan Verifikasi Hibah
+  </button>
+
+  <button type="button"
+    onclick="bukaPanelHibahPTLK('panelPenyaluranHibah')">
+    Penyaluran Hibah
+  </button>
+
+  <button type="button"
+    onclick="bukaPanelHibahPTLK('panelPenetapanHibah')">
+    Penetapan Hibah
+  </button>
+
+  <!-- MENU BARU MONEV KEGIATAN -->
+  <button type="button"
+    onclick="bukaPanelMonevKegiatanPTLK()">
+    Monev Kegiatan PTLK
+  </button>
+</div>
+
+<section class="panel" id="panelManajemenHibah">
+  <h2>Manajemen Hibah PTLK</h2>
+  <p class="muted">
+    Pendataan dan pengelolaan bantuan hibah kepada lembaga kebudayaan.
+  </p>
+
+  <h3>Formulir Data Pokok Hibah</h3>
+
+  <div class="form-grid">
+    <label>
+      Tahun Anggaran
+      <input type="number" id="hibahTahun" value="2026" min="2000" max="2100">
+    </label>
+
+    <label>
+      Nama Lembaga
+      <input type="text" id="hibahNamaLembaga" placeholder="Nama sanggar/lembaga">
+    </label>
+
+    <label>
+      Nama Penanggung Jawab
+      <input type="text" id="hibahPenanggungJawab" placeholder="Nama ketua/pimpinan">
+    </label>
+
+    <label>
+      Kabupaten/Kota
+      <input type="text" id="hibahWilayah" placeholder="Contoh: Kabupaten Buol">
+    </label>
+
+    <label>
+      Jenis Hibah
+      <select id="hibahJenis">
+        <option value="">Pilih jenis hibah</option>
+        <option value="UANG">Hibah Uang</option>
+        <option value="BARANG">Hibah Barang</option>
+        <option value="JASA">Hibah Jasa</option>
+      </select>
+    </label>
+
+    <label>
+      Nama Bantuan
+      <input type="text" id="hibahNamaBantuan" placeholder="Contoh: Bantuan alat musik tradisional">
+    </label>
+
+    <label>
+      Jumlah/Nilai Bantuan (Rp)
+      <input type="number" id="hibahJumlah" min="1" placeholder="Contoh: 30000000">
+    </label>
+
+    <label>
+      Volume
+      <input type="number" id="hibahVolume" min="0" placeholder="Jumlah atau volume">
+    </label>
+
+    <label>
+      Satuan
+      <input type="text" id="hibahSatuan" placeholder="Paket, unit, kegiatan, dll.">
+    </label>
+
+    <label>
+      Sumber Anggaran
+      <input type="text" id="hibahSumber" placeholder="Contoh: APBD Provinsi">
+    </label>
+  </div>
+
+  <label>
+    Tujuan dan Peruntukan Hibah
+    <textarea id="hibahTujuan" rows="3"
+      placeholder="Jelaskan tujuan pemberian hibah..."></textarea>
+  </label>
+
+  <label>
+    Catatan
+    <textarea id="hibahCatatan" rows="2"></textarea>
+  </label>
+
+  <div class="actions">
+    <button type="button" onclick="simpanDataHibahDashboardPTLK()">
+      Simpan Data Hibah
+    </button>
+    <button type="button" class="secondary"
+      onclick="muatDataHibahDashboardPTLK()">
+      Muat Daftar Hibah
+    </button>
+  </div>
+
+  <p id="statusManajemenHibah" class="muted"></p>
+
+  <h3>Daftar Data Hibah</h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>ID Hibah</th>
+          <th>Tahun</th>
+          <th>Nama Lembaga</th>
+          <th>Jenis</th>
+          <th>Nama Bantuan</th>
+          <th>Nilai Bantuan</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="daftarDataHibah">
+        <tr>
+          <td colspan="8">Klik Muat Daftar Hibah untuk membaca data.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="actions">
+    <button type="button"
+      class="secondary"
+      onclick="ujiDatabaseHibahDashboardPTLK()">
+      Uji Database Hibah
+    </button>
+  </div>
+
+  <p id="hasilUjiDatabaseHibah" class="muted">
+    Pemeriksaan database hibah belum dilakukan.
+  </p>
+</section>
+
+<section class="panel" id="panelPengajuanHibah">
+  <h2>Pengajuan dan Verifikasi Hibah PTLK</h2>
+  <p class="muted">
+    Pencatatan proposal, pengajuan nilai bantuan, dan pemeriksaan administrasi hibah.
+  </p>
+
+  <h3>Formulir Pengajuan Hibah</h3>
+
+  <div class="form-grid">
+    <label>
+      ID Hibah
+      <select id="pengajuanIdHibah">
+        <option value="">Pilih data hibah</option>
+      </select>
+    </label>
+
+    <label>
+      Nomor Proposal
+      <input type="text" id="pengajuanNomorProposal"
+        placeholder="Nomor proposal lembaga">
+    </label>
+
+    <label>
+      Nilai Bantuan yang Diajukan (Rp)
+      <input type="number" id="pengajuanNilai" min="1">
+    </label>
+
+    <label>
+      Tautan Proposal
+      <input type="url" id="pengajuanTautan"
+        placeholder="https://...">
+    </label>
+  </div>
+
+  <label>
+    Uraian Permohonan
+    <textarea id="pengajuanUraian" rows="3"></textarea>
+  </label>
+
+  <label>
+    Catatan
+    <textarea id="pengajuanCatatan" rows="2"></textarea>
+  </label>
+
+  <div class="actions">
+    <button type="button" onclick="simpanPengajuanHibahDashboardPTLK()">
+      Simpan Pengajuan
+    </button>
+    <button type="button" class="secondary"
+      onclick="muatPengajuanHibahDashboardPTLK()">
+      Muat Daftar Pengajuan
+    </button>
+  </div>
+
+  <p id="statusPengajuanHibah" class="muted"></p>
+
+  <h3>Daftar Pengajuan Hibah</h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>ID Pengajuan</th>
+          <th>ID Hibah</th>
+          <th>Tanggal</th>
+          <th>Nomor Proposal</th>
+          <th>Nilai Diajukan</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="daftarPengajuanHibah">
+        <tr>
+          <td colspan="7">Belum ada data yang dimuat.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Formulir Verifikasi Hibah</h3>
+
+  <div class="form-grid">
+    <label>
+      ID Pengajuan
+      <select id="verifikasiIdPengajuan">
+        <option value="">Pilih pengajuan hibah</option>
+      </select>
+    </label>
+
+    <label>
+      Hasil Verifikasi
+      <select id="verifikasiHasil">
+        <option value="">Pilih hasil verifikasi</option>
+        <option value="MEMENUHI_SYARAT">Memenuhi Syarat</option>
+        <option value="PERLU_PERBAIKAN">Perlu Perbaikan</option>
+        <option value="TIDAK_MEMENUHI_SYARAT">Tidak Memenuhi Syarat</option>
+      </select>
+    </label>
+
+    <label>
+      Kelengkapan Administrasi
+      <select id="verifikasiKelengkapan">
+        <option value="">Pilih kelengkapan</option>
+        <option value="LENGKAP">Lengkap</option>
+        <option value="BELUM_LENGKAP">Belum Lengkap</option>
+      </select>
+    </label>
+
+    <label>
+      Tautan Dokumen Verifikasi
+      <input type="url" id="verifikasiTautan"
+        placeholder="https://...">
+    </label>
+  </div>
+
+  <label>
+    Catatan Verifikasi
+    <textarea id="verifikasiCatatan" rows="3"></textarea>
+  </label>
+
+  <button type="button"
+    onclick="simpanVerifikasiHibahDashboardPTLK()">
+    Simpan Hasil Verifikasi
+  </button>
+
+  <p id="statusVerifikasiHibah" class="muted"></p>
+</section>
+
+<section id="panelPenyaluranHibah" class="panel hidden">
+  <h2>Penyaluran Hibah PTLK</h2>
+  <p class="muted">
+    Pencatatan realisasi penyaluran hibah uang, barang, dan jasa.
+  </p>
+
+  <h3>Formulir Penyaluran Hibah</h3>
+
+  <div class="form-grid">
+    <label>
+      ID Hibah
+      <select id="penyaluranIdHibah">
+        <option value="">Pilih data hibah</option>
+      </select>
+    </label>
+
+    <label>
+      Jenis Hibah
+      <select id="penyaluranJenis">
+        <option value="">Pilih jenis hibah</option>
+        <option value="UANG">Uang</option>
+        <option value="BARANG">Barang</option>
+        <option value="JASA">Jasa</option>
+      </select>
+    </label>
+
+    <label>
+      Tanggal Penyaluran
+      <input type="date" id="penyaluranTanggal">
+    </label>
+
+    <label>
+      Nilai Penyaluran (Rp)
+      <input type="number" id="penyaluranNilai" min="1">
+    </label>
+
+    <label>
+      Nama Barang/Jasa
+      <input type="text" id="penyaluranNamaBarangJasa">
+    </label>
+
+    <label>
+      Volume
+      <input type="number" id="penyaluranVolume" min="0">
+    </label>
+
+    <label>
+      Satuan
+      <input type="text" id="penyaluranSatuan"
+        placeholder="Paket, unit, kegiatan">
+    </label>
+
+    <label>
+      Nomor NPHD
+      <input type="text" id="penyaluranNphd">
+    </label>
+
+    <label>
+      Nomor BAST
+      <input type="text" id="penyaluranBast">
+    </label>
+
+    <label>
+      Tautan Dokumen BAST
+      <input type="url" id="penyaluranTautanBast"
+        placeholder="https://...">
+    </label>
+  </div>
+
+  <label>
+    Keterangan
+    <textarea id="penyaluranKeterangan" rows="3"></textarea>
+  </label>
+
+  <div class="actions">
+    <button type="button"
+      onclick="simpanPenyaluranHibahDashboardPTLK()">
+      Simpan Penyaluran
+    </button>
+
+    <button type="button" class="secondary"
+      onclick="muatPenyaluranHibahDashboardPTLK()">
+      Muat Daftar Penyaluran
+    </button>
+  </div>
+
+  <p id="statusPenyaluranHibah" class="muted"></p>
+
+  <h3>Daftar Penyaluran Hibah</h3>
+
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>ID Penyaluran</th>
+          <th>ID Hibah</th>
+          <th>Jenis</th>
+          <th>Tanggal</th>
+          <th>Nilai</th>
+          <th>NPHD</th>
+          <th>BAST</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="daftarPenyaluranHibah">
+        <tr>
+          <td colspan="9">
+            Klik Muat Daftar Penyaluran untuk membaca data.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="panelPenetapanHibah" class="panel hidden">
+  <h2>Penetapan Penerima Hibah PTLK</h2>
+  <p>Pengelolaan keputusan penetapan penerima bantuan hibah.</p>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>ID Hibah</label>
+      <select id="penetapanIdHibah">
+        <option value="">Pilih data hibah</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Tanggal Penetapan</label>
+      <input type="date" id="penetapanTanggal">
+    </div>
+
+    <div class="form-group">
+      <label>Nomor SK Penetapan</label>
+      <input type="text" id="penetapanNomorSK"
+        placeholder="Masukkan nomor SK">
+    </div>
+
+    <div class="form-group">
+      <label>Pejabat Penetap</label>
+      <input type="text" id="penetapanPejabat"
+        placeholder="Nama pejabat penetap">
+    </div>
+
+    <div class="form-group">
+      <label>Nilai Bantuan yang Ditetapkan (Rp)</label>
+      <input type="number" id="penetapanNilai"
+        min="1" placeholder="Masukkan nilai bantuan">
+    </div>
+
+    <div class="form-group">
+      <label>Tautan Dokumen SK</label>
+      <input type="url" id="penetapanTautanSK"
+        placeholder="Tautan Google Drive dokumen SK">
+    </div>
+
+    <div class="form-group">
+      <label>Catatan</label>
+      <textarea id="penetapanCatatan"
+        placeholder="Catatan penetapan hibah"></textarea>
+    </div>
+
+  </div>
+<button type="button"
+        onclick="bukaPanelPenetapanHibahPTLK()">
+  Penetapan Hibah
+</button>
+<button type="button"
+  onclick="bukaPanelHibahPTLK('panelLPJHibah')">
+  LPJ Hibah
+</button>
+
+<button type="button"
+  onclick="bukaPanelHibahPTLK('panelMonevHibah')">
+  Monitoring dan Evaluasi Hibah
+</button>
+
+  <div class="actions">
+    <button type="button" onclick="simpanPenetapanHibahDashboardPTLK()">
+      Simpan Penetapan
+    </button>
+
+    <button type="button" onclick="muatPenetapanHibahDashboardPTLK()">
+      Muat Daftar Penetapan
+    </button>
+  </div>
+
+ </div>
+  <div id="statusPenetapanHibah"></div>
+  
+</div>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>ID Hibah</th>
+          <th>Tanggal</th>
+          <th>Nomor SK</th>
+          <th>Pejabat Penetap</th>
+          <th>Nilai Ditetapkan</th>
+          <th>Status</th>
+          <th>Dokumen SK</th>
+        </tr>
+      </thead>
+      <tbody id="daftarPenetapanHibah">
+        <tr>
+          <td colspan="8">Belum ada data penetapan.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="panelLPJHibah" class="panel hidden">
+
+  <h2>PERTANGGUNGJAWABAN HIBAH (LPJ)</h2>
+  <p>
+    Pengiriman, pencatatan, dan pemeriksaan laporan
+    pertanggungjawaban bantuan hibah kebudayaan.
+  </p>
+
+  <hr>
+
+  <h3>1. Pengiriman LPJ Hibah</h3>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>Pilih ID Hibah / Penerima</label>
+      <select id="lpjIdHibah">
+        <option value="">Memuat data hibah...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Tanggal Penyerahan LPJ</label>
+      <input type="date" id="lpjTanggal">
+    </div>
+
+    <div class="form-group">
+      <label>Nomor LPJ</label>
+      <input type="text" id="lpjNomor"
+        placeholder="Masukkan nomor LPJ">
+    </div>
+
+    <div class="form-group">
+      <label>Nilai Pertanggungjawaban (Rp)</label>
+      <input type="number" id="lpjNilai"
+        min="1" step="1" placeholder="Masukkan nilai">
+    </div>
+
+    <div class="form-group">
+      <label>Tautan Dokumen LPJ</label>
+      <input type="url" id="lpjTautan"
+        placeholder="Masukkan tautan Google Drive atau dokumen">
+    </div>
+
+  </div>
+
+  <div class="form-group">
+    <label>Keterangan Pengiriman</label>
+    <textarea id="lpjKeterangan"
+      rows="3"
+      placeholder="Keterangan tambahan pengiriman LPJ"></textarea>
+  </div>
+
+  <div class="actions">
+    <button type="button"
+      onclick="simpanLPJHibahDashboardPTLK()">
+      Kirim LPJ
+    </button>
+
+    <button type="button"
+      onclick="muatLPJHibahDashboardPTLK()">
+      Muat Daftar LPJ
+    </button>
+  </div>
+
+  <div id="statusLPJHibah"></div>
+
+  <hr>
+
+  <h3>2. Daftar LPJ Hibah</h3>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>ID Hibah</th>
+          <th>Nomor LPJ</th>
+          <th>Tanggal</th>
+          <th>Nilai Pertanggungjawaban</th>
+          <th>Status LPJ</th>
+          <th>Dokumen</th>
+        </tr>
+      </thead>
+      <tbody id="daftarLPJHibah">
+        <tr>
+          <td colspan="7">Belum ada data LPJ.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <h3>3. Pemeriksaan dan Verifikasi LPJ</h3>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>Pilih LPJ untuk Diperiksa</label>
+      <select id="verifikasiLPJId">
+        <option value="">Pilih LPJ</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Hasil Pemeriksaan</label>
+      <select id="verifikasiLPJStatus">
+        <option value="">Pilih hasil pemeriksaan</option>
+        <option value="DITERIMA">DITERIMA</option>
+        <option value="PERLU_PERBAIKAN">PERLU PERBAIKAN</option>
+        <option value="DITOLAK">DITOLAK</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="form-group">
+    <label>Catatan Pemeriksaan</label>
+    <textarea id="verifikasiLPJCatatan"
+      rows="3"
+      placeholder="Tuliskan hasil pemeriksaan dan catatan perbaikan"></textarea>
+  </div>
+
+  <div class="actions">
+    <button type="button"
+      onclick="verifikasiLPJHibahDashboardPTLK()">
+      Simpan Hasil Pemeriksaan
+    </button>
+  </div>
+
+  <div id="statusVerifikasiLPJHibah"></div>
+
+</section>
+
+<!-- PANEL MONITORING DAN EVALUASI HIBAH PTLK -->
+<section id="panelMonevHibah" class="panel hidden">
+
+  <h2>MONITORING DAN EVALUASI HIBAH PTLK</h2>
+
+  <p>
+    Panel pencatatan, pemantauan, pemeriksaan, evaluasi,
+    dan tindak lanjut pelaksanaan bantuan hibah kebudayaan.
+  </p>
+
+  <hr>
+
+  <h3>1. Pencatatan Monitoring dan Evaluasi</h3>
+
+  <div class="form-grid">
+
+    <div class="form-group">
+      <label>Pilih Penerima Hibah</label>
+      <select id="monevIdHibah">
+        <option value="">Memuat data penerima hibah...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Tanggal Monitoring</label>
+      <input type="date" id="monevTanggal">
+    </div>
+
+    <div class="form-group">
+      <label>Lokasi Monitoring</label>
+      <input type="text" id="monevLokasi"
+        placeholder="Masukkan lokasi monitoring">
+    </div>
+
+    <div class="form-group">
+      <label>Nama Petugas Monitoring</label>
+      <input type="text" id="monevPetugas"
+        placeholder="Nama petugas">
+    </div>
+
+    <div class="form-group">
+      <label>Kesesuaian Penggunaan Hibah</label>
+      <select id="monevKesesuaian">
+        <option value="">Pilih hasil pemeriksaan</option>
+        <option value="SESUAI">SESUAI</option>
+        <option value="SEBAGIAN_SESUAI">SEBAGIAN SESUAI</option>
+        <option value="TIDAK_SESUAI">TIDAK SESUAI</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Status Tindak Lanjut</label>
+      <select id="monevStatusTindakLanjut">
+        <option value="">Pilih status tindak lanjut</option>
+        <option value="BELUM_DITINDAKLANJUTI">
+          BELUM DITINDAKLANJUTI
+        </option>
+        <option value="DALAM_PROSES">DALAM PROSES</option>
+        <option value="SELESAI">SELESAI</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="form-group">
+    <label>Hasil Monitoring dan Evaluasi</label>
+    <textarea id="monevHasil" rows="4"
+      placeholder="Uraikan hasil monitoring dan evaluasi..."></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Manfaat Bantuan Hibah</label>
+    <textarea id="monevManfaat" rows="3"
+      placeholder="Uraikan manfaat bantuan hibah bagi penerima..."></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Kendala yang Ditemukan</label>
+    <textarea id="monevKendala" rows="3"
+      placeholder="Tuliskan kendala dalam pelaksanaan atau penggunaan hibah..."></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Rekomendasi dan Saran Perbaikan</label>
+    <textarea id="monevRekomendasi" rows="3"
+      placeholder="Tuliskan rekomendasi hasil monitoring..."></textarea>
+  </div>
+
+  <div class="actions">
+    <button type="button"
+      onclick="simpanMonevHibahDashboardPTLK()">
+      Simpan Hasil Monev
+    </button>
+
+    <button type="button"
+      onclick="muatMonevHibahDashboardPTLK()">
+      Muat Daftar Monev
+    </button>
+  </div>
+
+  <div id="statusMonevHibah"></div>
+
+  <hr>
+
+  <h3>2. Daftar Monitoring dan Evaluasi Hibah</h3>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>ID Hibah</th>
+          <th>Tanggal</th>
+          <th>Lokasi</th>
+          <th>Petugas</th>
+          <th>Kesesuaian</th>
+          <th>Hasil Monitoring</th>
+          <th>Manfaat</th>
+          <th>Kendala</th>
+          <th>Rekomendasi</th>
+          <th>Status Tindak Lanjut</th>
+        </tr>
+      </thead>
+
+      <tbody id="daftarMonevHibah">
+        <tr>
+          <td colspan="11">
+            Belum ada data monitoring dan evaluasi hibah.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+<!-- AKHIR PANEL MONITORING DAN EVALUASI HIBAH PTLK -->
+
+  <section class="panel" id="panelBackup">
+    <h2>Pencadangan Database</h2><p class="muted">Membuat salinan seluruh spreadsheet database PTLK ke folder backup yang telah ditetapkan.</p>
+    <div class="actions"><button class="warning" onclick="jalankanBackup()">Backup Database Sekarang</button><button class="secondary" onclick="tesKoneksi()">Uji Koneksi Database</button></div>
+    <div id="statusBackup" class="loading"></div>
+  </section>
+  <div class="footer">ARSIP DIGITAL PTLK · Dinas Kebudayaan Provinsi Sulawesi Tengah</div>
+</main>
+
+<script>
+const TOKEN_LOGIN = <?!= JSON.stringify(tokenLogin) ?>;
+const NAMA_PENGGUNA = <?!= JSON.stringify(namaPengguna) ?>;
+const EMAIL_PENGGUNA = <?!= JSON.stringify(emailPengguna) ?>;
+const PERAN_PENGGUNA = <?!= JSON.stringify(peranPengguna) ?>;
+const PENUGASAN_PENGGUNA = <?!= JSON.stringify(penugasanPengguna) ?>;
+const WILAYAH_TUGAS_PENGGUNA = <?!= JSON.stringify(wilayahTugasPengguna) ?>;
+let BOLEH_VERIFIKASI_PTLK = false;
+let BOLEH_KELOLA_DATA_PTLK = false;
+let HASIL_ANALITIK = null;
+let DATA_VERIFIKASI = [];
+let DATA_EDIT_AKTIF = null;
+let JENIS_EDIT_AKTIF = '';
+
+const konfigurasiFirebaseDashboard = {
+  apiKey: "AIzaSyDFBOuzM0YlL_hi517LQ0ja-jpVWjQbS2g",
+  authDomain: "arsip-digital-ptlk.firebaseapp.com",
+  projectId: "arsip-digital-ptlk",
+  storageBucket: "arsip-digital-ptlk.firebasestorage.app",
+  messagingSenderId: "850938958983",
+  appId: "1:850938958983:web:9dc9b2096470510fbb9422",
+  measurementId: "G-W5WW49YVHN"
+};
+if (!firebase.apps.length) firebase.initializeApp(konfigurasiFirebaseDashboard);
+const authDashboard = firebase.auth();
+
+function el(id){return document.getElementById(id)}
+function pesan(teks,jenis){const p=el('pesanGlobal');p.textContent=teks;p.className='message show '+(jenis||'ok');}
+function status(id,teks){el(id).textContent=teks||''}
+function escapeHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function filters(){return {tahun:el('filterTahun').value,wilayah:el('filterWilayah').value,opk:el('filterOPK').value,status:el('filterStatus').value,jenis:el('filterJenis').value}}
+function setOptions(id,items,first){const s=el(id),old=s.value;s.innerHTML='';const o=document.createElement('option');o.value='';o.textContent=first;s.appendChild(o);(items||[]).forEach(v=>{const x=document.createElement('option');x.value=typeof v==='string'?v:v.value;x.textContent=typeof v==='string'?v:v.label;s.appendChild(x)});if([...s.options].some(x=>x.value===old))s.value=old}
+function callServer(nama,args,success,failure){let runner=google.script.run.withSuccessHandler(success).withFailureHandler(err=>{const m=err&&err.message?err.message:String(err);if(failure)failure(m);else pesan(m,'error')});runner[nama].apply(runner,args)}
+function terapkanFilter(){muatAnalitik()}
+function resetFilter(){['filterTahun','filterWilayah','filterOPK','filterStatus','filterJenis'].forEach(id=>el(id).value='');muatAnalitik()}
+function muatAnalitik(){
+  status('statusAnalitik','Sedang membaca database tenaga dan lembaga...');
+  callServer('AMBIL_DATA_DASHBOARD_INTERAKTIF_PTLK',[TOKEN_LOGIN,filters()],hasil=>{
+    if(!hasil||!hasil.ok){status('statusAnalitik',hasil&&hasil.pesan||'Data gagal dimuat.');return;}
+    HASIL_ANALITIK=hasil;status('statusAnalitik','Data diperbarui. Total '+hasil.ringkasan.totalData+' baris sesuai filter.');
+    if(!el('filterTahun').options.length||el('filterTahun').options.length===1)setOptions('filterTahun',hasil.pilihanFilter.tahun,'Semua tahun');
+    if(el('filterWilayah').options.length===1)setOptions('filterWilayah',hasil.pilihanFilter.wilayah,'Semua kabupaten/kota');
+    if(PERAN_PENGGUNA==='OPERATOR_KABKOTA'){el('filterWilayah').value=WILAYAH_TUGAS_PENGGUNA;el('filterWilayah').disabled=true;}
+    if(el('filterOPK').options.length===1)setOptions('filterOPK',hasil.pilihanFilter.opk,'Semua OPK');
+    if(el('filterStatus').options.length===1)setOptions('filterStatus',hasil.pilihanFilter.status,'Semua status');
+    renderAnalitik(hasil);
+  },m=>status('statusAnalitik','Gagal: '+m));
+}
+function renderAnalitik(h){
+  el('totalTenaga').textContent=h.ringkasan.totalTenaga.toLocaleString('id-ID');el('totalLembaga').textContent=h.ringkasan.totalLembaga.toLocaleString('id-ID');el('totalData').textContent=h.ringkasan.totalData.toLocaleString('id-ID');el('tenagaVerif').textContent=h.ringkasan.tenagaTerverifikasi.toLocaleString('id-ID');el('lembagaVerif').textContent=h.ringkasan.lembagaTerverifikasi.toLocaleString('id-ID');
+  renderBars('rekapWilayah',h.rekapWilayah);renderBars('rekapOPK',h.rekapOPK);renderBars('rekapStatus',h.rekapStatus);
+  const body=el('tabelAnalitik');body.innerHTML='';(h.detail||[]).forEach(x=>{const tr=document.createElement('tr');tr.innerHTML='<td>'+escapeHtml(x.jenis)+'</td><td>'+escapeHtml(x.nama)+'</td><td>'+escapeHtml(x.wilayah)+'</td><td>'+escapeHtml(x.opk||'-')+'</td><td>'+escapeHtml(x.status)+'</td><td>'+escapeHtml(x.tahun||'-')+'</td>';body.appendChild(tr)});if(!body.children.length)body.innerHTML='<tr><td colspan="6" class="muted">Tidak ada data yang cocok dengan filter.</td></tr>';
+}
+function renderBars(id,data){const box=el(id);box.innerHTML='';const max=Math.max(1,...(data||[]).map(x=>Number(x.jumlah)||0));(data||[]).forEach(x=>{const row=document.createElement('div');row.className='bar-row';const name=document.createElement('div');name.textContent=x.nama;const track=document.createElement('div');track.className='bar-track';const fill=document.createElement('div');fill.className='bar-fill';fill.style.width=((Number(x.jumlah)||0)/max*100)+'%';track.appendChild(fill);const val=document.createElement('div');val.className='bar-val';val.textContent=Number(x.jumlah||0).toLocaleString('id-ID');row.append(name,track,val);box.appendChild(row)});}
+function eksporFilter(format){status('statusAnalitik','Sedang menyiapkan ekspor '+format+'...');el('btnEksporExcel').disabled=true;el('btnEksporPDF').disabled=true;callServer('EKSPOR_FILTER_ANALITIK_PTLK',[TOKEN_LOGIN,format,filters()],hasil=>{el('btnEksporExcel').disabled=false;el('btnEksporPDF').disabled=false;if(!hasil||!hasil.ok){status('statusAnalitik',hasil&&hasil.pesan||'Ekspor gagal.');return;}status('statusAnalitik',hasil.pesan+' '+hasil.namaFile);window.open(hasil.url,'_blank');},m=>{el('btnEksporExcel').disabled=false;el('btnEksporPDF').disabled=false;status('statusAnalitik','Ekspor gagal: '+m)});}
+
+function muatVerifikasi(){const jenis=el('jenisVerifikasi').value;status('statusVerifikasi','Mengambil data '+jenis+'...');el('tabelVerifikasi').innerHTML='';callServer('ambilDataVerifikasiPTLK',[TOKEN_LOGIN,jenis],hasil=>{if(!hasil||!hasil.ok){status('statusVerifikasi',hasil&&hasil.pesan||'Data verifikasi gagal dimuat.');return;}DATA_VERIFIKASI=hasil.data||[];BOLEH_VERIFIKASI_PTLK=!!hasil.bolehVerifikasi;BOLEH_KELOLA_DATA_PTLK=!!hasil.bolehKelolaData;status('statusVerifikasi','Data '+jenis+': '+DATA_VERIFIKASI.length+' baris.');renderVerifikasi();},m=>status('statusVerifikasi','Gagal: '+m));}
+function renderVerifikasi(){const q=el('cariVerifikasi').value.trim().toLowerCase();const body=el('tabelVerifikasi');body.innerHTML='';DATA_VERIFIKASI.filter(x=>[x.ID_TENAGA,x.ID_LEMBAGA,x.NAMA_LENGKAP,x.NAMA_LEMBAGA,x.KABUPATEN_KOTA].join(' ').toLowerCase().includes(q)).forEach(x=>{const id=x.ID_TENAGA||x.ID_LEMBAGA;const nama=x.NAMA_LENGKAP||x.NAMA_LEMBAGA||'';const aksi=[];if(BOLEH_KELOLA_DATA_PTLK)aksi.push('<button class="small" onclick="bukaEditor(\''+escapeHtml(id).replace(/'/g,"\\'")+'\')">Perbaiki</button>');if(BOLEH_VERIFIKASI_PTLK){aksi.push('<button class="small success" onclick="verifikasi(\''+escapeHtml(id).replace(/'/g,"\\'")+'\',\'TERVERIFIKASI\')">Terima</button>');aksi.push('<button class="small warning" onclick="verifikasi(\''+escapeHtml(id).replace(/'/g,"\\'")+'\',\'PERLU PERBAIKAN\')">Perbaiki status</button>');aksi.push('<button class="small danger" onclick="verifikasi(\''+escapeHtml(id).replace(/'/g,"\\'")+'\',\'DITOLAK\')">Tolak</button>');}const tr=document.createElement('tr');tr.innerHTML='<td>'+escapeHtml(id)+'</td><td>'+escapeHtml(nama)+'</td><td>'+escapeHtml(x.KABUPATEN_KOTA||'')+'</td><td>'+escapeHtml(x.OBJEK_PEMAJUAN_KEBUDAYAAN||'')+'</td><td>'+escapeHtml(x.STATUS_VERIFIKASI||'BELUM DIVERIFIKASI')+'</td><td><div class="actions">'+(aksi.join(' ')||'-')+'</div></td>';body.appendChild(tr)});if(!body.children.length)body.innerHTML='<tr><td colspan="6">Tidak ada data ditemukan.</td></tr>'}
+
+el('cariVerifikasi').addEventListener('input',renderVerifikasi);
+function verifikasi(id,statusBaru){let catatan='';if(statusBaru!=='TERVERIFIKASI'){catatan=prompt('Masukkan catatan verifikator:')||'';if(!catatan.trim())return alert('Catatan wajib diisi.');}if(!confirm('Simpan status '+statusBaru+' untuk '+id+'?'))return;callServer('simpanVerifikasiPTLK',[TOKEN_LOGIN,el('jenisVerifikasi').value,id,statusBaru,catatan],hasil=>{if(!hasil||!hasil.ok){pesan(hasil&&hasil.pesan||'Verifikasi gagal.','error');return;}pesan(hasil.pesan,'ok');muatVerifikasi();muatAnalitik()},m=>pesan(m,'error'));}
+function bukaEditor(id){const x=DATA_VERIFIKASI.find(d=>String(d.ID_TENAGA||d.ID_LEMBAGA)===String(id));if(!x)return;DATA_EDIT_AKTIF=x;JENIS_EDIT_AKTIF=el('jenisVerifikasi').value;el('judulEditor').textContent='Perbaiki '+(x.NAMA_LENGKAP||x.NAMA_LEMBAGA||id);const form=el('formEditor');form.innerHTML='';const protectedKeys=['ID_TENAGA','ID_LEMBAGA','TANGGAL_INPUT','EMAIL_PENGISI','STATUS_VERIFIKASI','CATATAN_VERIFIKATOR','VERIFIKATOR','TANGGAL_VERIFIKASI','_baris'];Object.keys(x).forEach(k=>{if(protectedKeys.includes(k))return;if(PERAN_PENGGUNA==='OPERATOR_KABKOTA'&&k==='KABUPATEN_KOTA')return;const wrap=document.createElement('div');wrap.className='field';const label=document.createElement('label');label.textContent=k;let input;if(String(x[k]||'').length>90){input=document.createElement('textarea')}else{input=document.createElement('input')}input.value=x[k]==null?'':String(x[k]);input.dataset.field=k;wrap.append(label,input);form.appendChild(wrap)});el('editorData').classList.remove('hidden');el('editorData').scrollIntoView({behavior:'smooth',block:'start'});}
+function tutupEditor(){el('editorData').classList.add('hidden');DATA_EDIT_AKTIF=null;}
+function simpanEditData(){if(!DATA_EDIT_AKTIF)return;const perubahan={};el('formEditor').querySelectorAll('[data-field]').forEach(x=>perubahan[x.dataset.field]=x.value);const id=DATA_EDIT_AKTIF.ID_TENAGA||DATA_EDIT_AKTIF.ID_LEMBAGA;callServer('simpanPerbaikanDataPTLK',[TOKEN_LOGIN,JENIS_EDIT_AKTIF,id,perubahan],hasil=>{if(!hasil||!hasil.ok){pesan(hasil&&hasil.pesan||'Perbaikan gagal disimpan.','error');return;}pesan(hasil.pesan,'ok');tutupEditor();muatVerifikasi();muatAnalitik()},m=>pesan(m,'error'));}
+
+
+function siapkanMenuKelolaOperator() {
+  const menu = el('menuKelolaOperator');
+
+  if (!menu) return;
+
+  const admin =
+    String(PERAN_PENGGUNA || '').trim().toUpperCase() === 'ADMIN_UTAMA';
+
+  menu.style.display = admin ? '' : 'none';
+}
+
+function bukaPanelKelolaOperator() {
+  if (
+    String(PERAN_PENGGUNA || '').trim().toUpperCase()
+    !== 'ADMIN_UTAMA'
+  ) {
+    alert('Panel ini hanya dapat diakses Admin Utama.');
+    return;
+  }
+
+  // Tutup panel lain melalui mekanisme navigasi aplikasi
+  // jika memang diperlukan sesuai fungsi navigasi yang sudah ada.
+
+  const panel = el('panelKelolaOperator');
+  if (!panel) return;
+
+  panel.style.display = 'block';
+  muatDaftarKelolaOperator();
+}
+
+
+// ==================================================
+// PANEL PEMANTAUAN SELURUH RENCANA KEGIATAN PTLK
+// ==================================================
+let DATA_SELURUH_RENCANA_PTLK = [];
+
+function aturPanelDaftarSeluruhRencanaPTLK() {
+  // Panel pemantauan tersedia bagi seluruh pengguna yang berhasil masuk ke aplikasi.
+  const panel = el('panelDaftarSeluruhRencana');
+  if (!panel) return;
+  panel.classList.remove('hidden');
+  muatDaftarSeluruhRencanaPTLK();
+}
+
+function muatDaftarSeluruhRencanaPTLK() {
+  status('statusDaftarSeluruhRencana', 'Sedang mengambil seluruh rencana kegiatan dari database...');
+  el('tabelDaftarSeluruhRencana').innerHTML = '<tr><td colspan="8">Memuat data...</td></tr>';
+  callServer('ambilDaftarRencanaKegiatanPTLK', [TOKEN_LOGIN, {}], hasil => {
+    if (!hasil || !hasil.ok) {
+      DATA_SELURUH_RENCANA_PTLK = [];
+      status('statusDaftarSeluruhRencana', hasil && hasil.pesan ? hasil.pesan : 'Daftar seluruh rencana gagal dimuat.');
+      el('tabelDaftarSeluruhRencana').innerHTML = '<tr><td colspan="8">Data gagal dimuat.</td></tr>';
+      perbaruiRingkasanSeluruhRencanaPTLK([]);
+      return;
+    }
+    DATA_SELURUH_RENCANA_PTLK = Array.isArray(hasil.data) ? hasil.data : [];
+    isiFilterSeluruhRencanaPTLK();
+    renderDaftarSeluruhRencanaPTLK();
+    status('statusDaftarSeluruhRencana', 'Data database berhasil dimuat: ' + DATA_SELURUH_RENCANA_PTLK.length + ' rencana kegiatan. Gunakan filter untuk menyaring daftar.');
+  }, m => {
+    status('statusDaftarSeluruhRencana', 'Gagal mengambil daftar seluruh rencana: ' + m);
+    el('tabelDaftarSeluruhRencana').innerHTML = '<tr><td colspan="8">Terjadi kesalahan saat mengambil data.</td></tr>';
+  });
+}
+
+function isiFilterSeluruhRencanaPTLK() {
+  const tahunLama = el('filterSemuaRencanaTahun').value;
+  const wilayahLama = el('filterSemuaRencanaWilayah').value;
+  const tahun = [...new Set(DATA_SELURUH_RENCANA_PTLK.map(x => String(x.tahun || '')).filter(Boolean))].sort((a,b) => Number(b)-Number(a));
+  const wilayah = [...new Set(DATA_SELURUH_RENCANA_PTLK.map(x => String(x.kabupatenKota || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'id'));
+  setOptions('filterSemuaRencanaTahun', tahun, 'Semua tahun');
+  setOptions('filterSemuaRencanaWilayah', wilayah, 'Semua kabupaten/kota');
+  if (tahun.includes(tahunLama)) el('filterSemuaRencanaTahun').value = tahunLama;
+  if (wilayah.includes(wilayahLama)) el('filterSemuaRencanaWilayah').value = wilayahLama;
+}
+
+function perbaruiRingkasanSeluruhRencanaPTLK(data) {
+  const daftar = data || [];
+  const hitung = status => daftar.filter(x => String(x.statusPersetujuan || '').trim().toUpperCase() === status).length;
+  el('jumlahSemuaRencana').textContent = daftar.length;
+  el('jumlahRencanaDraf').textContent = hitung('DRAF');
+  el('jumlahRencanaDiajukan').textContent = hitung('DIAJUKAN');
+  el('jumlahRencanaDisetujui').textContent = hitung('DISETUJUI');
+  el('jumlahRencanaDitolak').textContent = hitung('DITOLAK');
+}
+
+function renderDaftarSeluruhRencanaPTLK() {
+  const statusFilter = el('filterSemuaRencanaStatus').value.trim().toUpperCase();
+  const tahunFilter = el('filterSemuaRencanaTahun').value;
+  const wilayahFilter = el('filterSemuaRencanaWilayah').value.trim().toUpperCase();
+  const kata = el('cariSemuaRencana').value.trim().toLowerCase();
+  const semua = DATA_SELURUH_RENCANA_PTLK;
+  perbaruiRingkasanSeluruhRencanaPTLK(semua);
+  const daftar = semua.filter(x => {
+    const st = String(x.statusPersetujuan || '').trim().toUpperCase();
+    const th = String(x.tahun || '');
+    const wilayah = String(x.kabupatenKota || '').trim().toUpperCase();
+    const cari = (String(x.idKegiatan || '') + ' ' + String(x.namaKegiatan || '')).toLowerCase();
+    return (!statusFilter || st === statusFilter) && (!tahunFilter || th === tahunFilter) && (!wilayahFilter || wilayah === wilayahFilter) && (!kata || cari.includes(kata));
+  }).sort((a,b) => Number(b.tahun || 0)-Number(a.tahun || 0) || String(b.idKegiatan || '').localeCompare(String(a.idKegiatan || '')));
+  const body = el('tabelDaftarSeluruhRencana');
+  body.innerHTML = '';
+  if (!daftar.length) {
+    body.innerHTML = '<tr><td colspan="8" class="muted">Tidak ada rencana yang sesuai dengan filter.</td></tr>';
+    status('statusDaftarSeluruhRencana', 'Tidak ada data yang sesuai filter. Total data dalam database: ' + semua.length + '.');
+    return;
+  }
+  daftar.forEach(x => {
+    const tr = document.createElement('tr');
+    const values = [x.idKegiatan, x.tahun, x.namaKegiatan, x.kabupatenKota, Number(x.anggaranRencana || 0).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0})];
+    values.forEach(v => { const td = document.createElement('td'); td.textContent = v == null || v === '' ? '-' : String(v); tr.appendChild(td); });
+    const tdStatus = document.createElement('td');
+    const badge = document.createElement('span');
+    const st = String(x.statusPersetujuan || 'BELUM DIISI').trim().toUpperCase();
+    badge.className = 'status ' + st.replace(/[^A-Z0-9_]/g, '');
+    badge.textContent = st;
+    tdStatus.appendChild(badge); tr.appendChild(tdStatus);
+    const tdPelaksanaan = document.createElement('td'); tdPelaksanaan.textContent = x.statusPelaksanaan || '-'; tr.appendChild(tdPelaksanaan);
+    const tdAksi = document.createElement('td');
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'small secondary'; btn.textContent = 'Lihat Detail';
+    btn.addEventListener('click', () => bukaDetailDaftarSeluruhRencana(x.idKegiatan, btn));
+    tdAksi.appendChild(btn); tr.appendChild(tdAksi);
+    body.appendChild(tr);
+  });
+  status('statusDaftarSeluruhRencana', 'Menampilkan ' + daftar.length + ' dari ' + semua.length + ' rencana kegiatan.');
+}
+
+function resetFilterSeluruhRencanaPTLK() {  
+  el('filterSemuaRencanaStatus').value = '';
+  el('filterSemuaRencanaTahun').value = '';
+  el('filterSemuaRencanaWilayah').value = '';
+  el('cariSemuaRencana').value = '';
+  renderDaftarSeluruhRencanaPTLK();
+}
+function tampilkanRencanaStatusPTLK(statusPilihan) {
+  const statusFilter = el('filterSemuaRencanaStatus');
+
+  if (!statusFilter) {
+    alert('Filter status rencana tidak ditemukan.');
+    return;
+  }
+
+  statusFilter.value = String(statusPilihan || '')
+    .trim()
+    .toUpperCase();
+
+  el('filterSemuaRencanaTahun').value = '';
+  el('filterSemuaRencanaWilayah').value = '';
+  el('cariSemuaRencana').value = '';
+
+  renderDaftarSeluruhRencanaPTLK();
+
+  el('tabelDaftarSeluruhRencana').scrollIntoView({
+    behavior: 'smooth',
+    block: 'center'
+  });
+}
+
+function bukaDetailDaftarSeluruhRencana(idKegiatan, tombol) {
+  if (tombol) { tombol.disabled = true; tombol.textContent = 'Memuat...'; }
+  callServer('ambilDetailRencanaKegiatanPTLK', [TOKEN_LOGIN, idKegiatan], hasil => {
+    if (tombol) { tombol.disabled = false; tombol.textContent = 'Lihat Detail'; }
+    if (!hasil || !hasil.ok || !hasil.data) {
+      status('statusDaftarSeluruhRencana', hasil && hasil.pesan ? hasil.pesan : 'Detail rencana tidak dapat dibuka.');
+      return;
+    }
+    const d = hasil.data;
+    const fields = [
+      ['ID Kegiatan', d.idKegiatan], ['Program', d.namaProgram], ['Subkegiatan', d.namaSubkegiatan],
+      ['Tahun', d.tahun], ['Nama Kegiatan', d.namaKegiatan], ['Tujuan', d.tujuan], ['Sasaran', d.sasaran],
+      ['Kode Indikator', d.kodeIndikator], ['Target Output', (d.targetOutput || 0) + ' ' + (d.satuan || '')],
+      ['Target Peserta', d.targetPeserta], ['Tanggal Mulai', d.tanggalMulai], ['Tanggal Selesai', d.tanggalSelesai],
+      ['Kabupaten/Kota', d.kabupatenKota], ['Lokasi', d.lokasi], ['Penanggung Jawab', d.penanggungJawab],
+      ['Anggaran Rencana', Number(d.anggaranRencana || 0).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0})],
+      ['Status Persetujuan', d.statusPersetujuan], ['Disetujui Oleh', d.disetujuiOleh],
+      ['Tanggal Persetujuan', d.tanggalPersetujuan], ['Status Pelaksanaan', d.statusPelaksanaan], ['Catatan / Riwayat', d.catatan]
+    ];
+    const box = el('isiDetailDaftarSeluruhRencana'); box.innerHTML = '';
+    fields.forEach(([label, value]) => {
+      const p = document.createElement('p'); const strong = document.createElement('strong');
+      strong.textContent = label + ': '; p.appendChild(strong);
+      p.appendChild(document.createTextNode(value == null || value === '' ? '-' : String(value)));
+      box.appendChild(p);
+    });
+    el('detailDaftarSeluruhRencana').classList.remove('hidden');
+    el('detailDaftarSeluruhRencana').scrollIntoView({behavior:'smooth',block:'start'});
+  }, m => {
+    if (tombol) { tombol.disabled = false; tombol.textContent = 'Lihat Detail'; }
+    status('statusDaftarSeluruhRencana', 'Gagal membuka detail: ' + m);
+  });
+}
+
+function tutupDetailDaftarSeluruhRencana() {
+  el('detailDaftarSeluruhRencana').classList.add('hidden');
+}
+
+['filterSemuaRencanaStatus','filterSemuaRencanaTahun','filterSemuaRencanaWilayah'].forEach(id => {
+  const field = el(id); if (field) field.addEventListener('change', renderDaftarSeluruhRencanaPTLK);
+});
+const inputCariSemuaRencana = el('cariSemuaRencana');
+if (inputCariSemuaRencana) inputCariSemuaRencana.addEventListener('input', renderDaftarSeluruhRencanaPTLK);
+
+// ==================================================
+// PANEL PERSETUJUAN RENCANA KEGIATAN PTLK
+// ==================================================
+let DATA_RENCANA_DIAJUKAN = [];
+let DETAIL_RENCANA_AKTIF = null;
+
+function aturPanelPersetujuanRencana() {
+  const panel = el('panelPersetujuanRencana');
+  if (!panel) return;
+  const peran = String(PERAN_PENGGUNA || '').trim().toUpperCase();
+  const boleh = ['ADMIN_UTAMA', 'OPERATOR_VERIFIKATOR'].includes(peran);
+  panel.classList.toggle('hidden', !boleh);
+  if (boleh) muatDaftarPersetujuanRencana();
+}
+
+function muatDaftarPersetujuanRencana() {
+  if (!['ADMIN_UTAMA', 'OPERATOR_VERIFIKATOR'].includes(String(PERAN_PENGGUNA || '').trim().toUpperCase())) {
+    status('statusPersetujuanRencana', 'Akses hanya untuk Admin Utama dan Operator Verifikator.');
+    return;
+  }
+  status('statusPersetujuanRencana', 'Sedang mengambil daftar rencana kegiatan...');
+  el('tabelPersetujuanRencana').innerHTML = '<tr><td colspan="7">Memuat data...</td></tr>';
+  callServer('ambilDaftarRencanaKegiatanPTLK', [TOKEN_LOGIN, {}], hasil => {
+    if (!hasil || !hasil.ok) {
+      DATA_RENCANA_DIAJUKAN = [];
+      status('statusPersetujuanRencana', hasil && hasil.pesan ? hasil.pesan : 'Daftar pengajuan gagal dimuat.');
+      el('tabelPersetujuanRencana').innerHTML = '<tr><td colspan="7">Data gagal dimuat.</td></tr>';
+      return;
+    }
+    DATA_RENCANA_DIAJUKAN = (hasil.data || []).filter(x => String(x.statusPersetujuan || '').trim().toUpperCase() === 'DIAJUKAN');
+    status('statusPersetujuanRencana', 'Jumlah rencana menunggu keputusan: ' + DATA_RENCANA_DIAJUKAN.length);
+    renderDaftarPersetujuanRencana();
+  }, m => {
+    status('statusPersetujuanRencana', 'Gagal mengambil daftar: ' + m);
+    el('tabelPersetujuanRencana').innerHTML = '<tr><td colspan="7">Terjadi kesalahan saat mengambil data.</td></tr>';
+  });
+}
+
+function renderDaftarPersetujuanRencana() {
+  const body = el('tabelPersetujuanRencana');
+  body.innerHTML = '';
+  if (!DATA_RENCANA_DIAJUKAN.length) {
+    body.innerHTML = '<tr><td colspan="7" class="muted">Belum ada rencana kegiatan berstatus DIAJUKAN.</td></tr>';
+    return;
+  }
+  DATA_RENCANA_DIAJUKAN.forEach(x => {
+    const tr = document.createElement('tr');
+    const values = [x.idKegiatan, x.tahun, x.namaKegiatan, x.kabupatenKota, Number(x.anggaranRencana || 0).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0}), x.statusPersetujuan];
+    values.forEach(v => { const td = document.createElement('td'); td.textContent = v == null || v === '' ? '-' : String(v); tr.appendChild(td); });
+    const tdAksi = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'small'; btn.textContent = 'Periksa Detail';
+    btn.addEventListener('click', () => bukaDetailPersetujuanRencana(x.idKegiatan, btn));
+    tdAksi.appendChild(btn); tr.appendChild(tdAksi); body.appendChild(tr);
+  });
+}
+
+function bukaDetailPersetujuanRencana(idKegiatan, tombol) {
+  if (tombol) { tombol.disabled = true; tombol.textContent = 'Memuat...'; }
+  status('statusPersetujuanRencana', 'Mengambil detail rencana ' + idKegiatan + '...');
+  callServer('ambilDetailRencanaKegiatanPTLK', [TOKEN_LOGIN, idKegiatan], hasil => {
+    if (tombol) { tombol.disabled = false; tombol.textContent = 'Periksa Detail'; }
+    if (!hasil || !hasil.ok || !hasil.data) {
+      status('statusPersetujuanRencana', hasil && hasil.pesan ? hasil.pesan : 'Detail rencana gagal dibuka.');
+      return;
+    }
+    DETAIL_RENCANA_AKTIF = hasil.data;
+    const d = hasil.data;
+    const fields = [
+      ['ID Kegiatan', d.idKegiatan], ['Program', d.namaProgram], ['Subkegiatan', d.namaSubkegiatan],
+      ['Tahun', d.tahun], ['Nama Kegiatan', d.namaKegiatan], ['Tujuan', d.tujuan],
+      ['Sasaran', d.sasaran], ['Kode Indikator', d.kodeIndikator], ['Target Output', (d.targetOutput || 0) + ' ' + (d.satuan || '')],
+      ['Target Peserta', d.targetPeserta], ['Tanggal Mulai', d.tanggalMulai], ['Tanggal Selesai', d.tanggalSelesai],
+      ['Kabupaten/Kota', d.kabupatenKota], ['Lokasi', d.lokasi], ['Penanggung Jawab', d.penanggungJawab],
+      ['Anggaran Rencana', Number(d.anggaranRencana || 0).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0})],
+      ['Status Persetujuan', d.statusPersetujuan], ['Status Pelaksanaan', d.statusPelaksanaan], ['Catatan', d.catatan]
+    ];
+    const box = el('isiDetailPersetujuanRencana'); box.innerHTML = '';
+    fields.forEach(([label, value]) => {
+      const p = document.createElement('p'); const strong = document.createElement('strong');
+      strong.textContent = label + ': '; p.appendChild(strong); p.appendChild(document.createTextNode(value == null || value === '' ? '-' : String(value))); box.appendChild(p);
+    });
+    el('catatanPersetujuanRencana').value = '';
+    const dapatDiputus = String(d.statusPersetujuan || '').toUpperCase() === 'DIAJUKAN';
+    el('btnSetujuiRencana').disabled = !dapatDiputus;
+    el('btnTolakRencana').disabled = !dapatDiputus;
+    el('detailPersetujuanRencana').classList.remove('hidden');
+    status('statusPersetujuanRencana', 'Detail rencana berhasil dimuat. Periksa seluruh informasi sebelum memberikan keputusan.');
+    el('detailPersetujuanRencana').scrollIntoView({behavior:'smooth',block:'start'});
+  }, m => {
+    if (tombol) { tombol.disabled = false; tombol.textContent = 'Periksa Detail'; }
+    status('statusPersetujuanRencana', 'Gagal membuka detail: ' + m);
+  });
+}
+
+function tutupDetailPersetujuanRencana() {
+  el('detailPersetujuanRencana').classList.add('hidden');
+  DETAIL_RENCANA_AKTIF = null;
+}
+
+function putuskanRencanaPTLK(keputusan) {
+  if (!DETAIL_RENCANA_AKTIF || !DETAIL_RENCANA_AKTIF.idKegiatan) {
+    alert('Pilih dan buka detail rencana terlebih dahulu.'); return;
+  }
+  const catatan = el('catatanPersetujuanRencana').value.trim();
+  if (keputusan === 'DITOLAK' && !catatan) {
+    alert('Alasan penolakan wajib diisi.'); el('catatanPersetujuanRencana').focus(); return;
+  }
+  const label = keputusan === 'DISETUJUI' ? 'MENYETUJUI' : 'MENOLAK';
+  if (!confirm('Apakah Anda yakin akan ' + label + ' rencana kegiatan ini? Keputusan akan langsung disimpan ke database.')) return;
+  const id = DETAIL_RENCANA_AKTIF.idKegiatan;
+  const tombolSetuju = el('btnSetujuiRencana'), tombolTolak = el('btnTolakRencana');
+  tombolSetuju.disabled = true; tombolTolak.disabled = true;
+  status('statusPersetujuanRencana', 'Sedang menyimpan keputusan ' + keputusan + '...');
+  callServer('verifikasiRencanaKegiatanPTLK', [TOKEN_LOGIN, id, keputusan, catatan], hasil => {
+    if (!hasil || !hasil.ok) {
+      tombolSetuju.disabled = false; tombolTolak.disabled = false;
+      status('statusPersetujuanRencana', hasil && hasil.pesan ? hasil.pesan : 'Keputusan gagal disimpan.');
+      return;
+    }
+    pesan(hasil.pesan || 'Keputusan berhasil disimpan.', 'ok');
+    tutupDetailPersetujuanRencana();
+    muatDaftarPersetujuanRencana();
+    muatDaftarSeluruhRencanaPTLK();
+  }, m => {
+    tombolSetuju.disabled = false; tombolTolak.disabled = false;
+    status('statusPersetujuanRencana', 'Gagal menyimpan keputusan: ' + m);
+  });
+}
+
+// ==================================================
+// PANEL RENCANA DITOLAK DAN PERBAIKAN RENCANA PTLK
+// ==================================================
+let DATA_RENCANA_DITOLAK = [];
+let DETAIL_RENCANA_DITOLAK_AKTIF = null;
+let REVISI_RENCANA_SUDAH_DISIMPAN = false;
+
+function aturPanelRencanaDitolak() {
+  const panel = el('panelRencanaDitolak');
+  if (!panel) return;
+  const peran = String(PERAN_PENGGUNA || '').trim().toUpperCase();
+  const boleh = ['ADMIN_UTAMA', 'OPERATOR_PENGELOLA_DATA', 'OPERATOR_PENGOLAH_DATA'].includes(peran);
+  panel.classList.toggle('hidden', !boleh);
+  if (boleh) muatDaftarRencanaDitolak();
+}
+
+function muatDaftarRencanaDitolak() {
+  const peran = String(PERAN_PENGGUNA || '').trim().toUpperCase();
+  if (!['ADMIN_UTAMA', 'OPERATOR_PENGELOLA_DATA', 'OPERATOR_PENGOLAH_DATA'].includes(peran)) {
+    status('statusRencanaDitolak', 'Akses hanya untuk Admin Utama dan Operator Pengelola/Pengolah Data.');
+    return;
+  }
+  status('statusRencanaDitolak', 'Sedang mengambil rencana berstatus DITOLAK...');
+  el('tabelRencanaDitolak').innerHTML = '<tr><td colspan="7">Memuat data...</td></tr>';
+  callServer('ambilDaftarRencanaKegiatanPTLK', [TOKEN_LOGIN, {}], hasil => {
+    if (!hasil || !hasil.ok) {
+      DATA_RENCANA_DITOLAK = [];
+      status('statusRencanaDitolak', hasil && hasil.pesan ? hasil.pesan : 'Daftar rencana ditolak gagal dimuat.');
+      el('tabelRencanaDitolak').innerHTML = '<tr><td colspan="7">Data gagal dimuat.</td></tr>';
+      return;
+    }
+    DATA_RENCANA_DITOLAK = (hasil.data || []).filter(x => String(x.statusPersetujuan || '').trim().toUpperCase() === 'DITOLAK');
+    status('statusRencanaDitolak', 'Jumlah rencana yang perlu diperbaiki: ' + DATA_RENCANA_DITOLAK.length);
+    renderDaftarRencanaDitolak();
+  }, m => {
+    status('statusRencanaDitolak', 'Gagal mengambil daftar: ' + m);
+    el('tabelRencanaDitolak').innerHTML = '<tr><td colspan="7">Terjadi kesalahan saat mengambil data.</td></tr>';
+  });
+}
+
+function renderDaftarRencanaDitolak() {
+  const body = el('tabelRencanaDitolak');
+  body.innerHTML = '';
+  if (!DATA_RENCANA_DITOLAK.length) {
+    body.innerHTML = '<tr><td colspan="7" class="muted">Belum ada rencana kegiatan berstatus DITOLAK.</td></tr>';
+    return;
+  }
+  DATA_RENCANA_DITOLAK.forEach(x => {
+    const tr = document.createElement('tr');
+    [x.idKegiatan, x.tahun, x.namaKegiatan, x.kabupatenKota, Number(x.anggaranRencana || 0).toLocaleString('id-ID', {style:'currency',currency:'IDR',maximumFractionDigits:0}), x.statusPersetujuan].forEach(v => {
+      const td = document.createElement('td'); td.textContent = v == null || v === '' ? '-' : String(v); tr.appendChild(td);
+    });
+    const td = document.createElement('td');
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'small'; btn.textContent = 'Buka dan Perbaiki';
+    btn.addEventListener('click', () => bukaEditorRencanaDitolak(x.idKegiatan, btn));
+    td.appendChild(btn); tr.appendChild(td); body.appendChild(tr);
+  });
+}
+
+function bukaEditorRencanaDitolak(idKegiatan, tombol) {
+  if (tombol) { tombol.disabled = true; tombol.textContent = 'Memuat...'; }
+  status('statusRencanaDitolak', 'Mengambil detail dan alasan penolakan...');
+  callServer('ambilDetailRencanaKegiatanPTLK', [TOKEN_LOGIN, idKegiatan], hasil => {
+    if (tombol) { tombol.disabled = false; tombol.textContent = 'Buka dan Perbaiki'; }
+    if (!hasil || !hasil.ok || !hasil.data) {
+      status('statusRencanaDitolak', hasil && hasil.pesan ? hasil.pesan : 'Detail rencana gagal dibuka.'); return;
+    }
+    const d = hasil.data;
+    if (String(d.statusPersetujuan || '').toUpperCase() !== 'DITOLAK') {
+      status('statusRencanaDitolak', 'Rencana ini tidak lagi berstatus DITOLAK. Perbarui daftar.');
+      muatDaftarRencanaDitolak(); return;
+    }
+    DETAIL_RENCANA_DITOLAK_AKTIF = d;
+    REVISI_RENCANA_SUDAH_DISIMPAN = false;
+    el('btnAjukanUlangRencana').disabled = true;
+    const ringkas = el('ringkasanRencanaDitolak'); ringkas.innerHTML = '';
+    [['ID Kegiatan', d.idKegiatan], ['Program', d.namaProgram], ['Subkegiatan', d.namaSubkegiatan], ['Tahun', d.tahun], ['Status', d.statusPersetujuan], ['Indikator', d.kodeIndikator]].forEach(([k,v]) => {
+      const p = document.createElement('p'); const b = document.createElement('strong'); b.textContent = k + ': '; p.appendChild(b); p.appendChild(document.createTextNode(v == null || v === '' ? '-' : String(v))); ringkas.appendChild(p);
+    });
+    el('alasanPenolakanRencana').textContent = d.catatan || 'Catatan penolakan tidak tersedia pada detail rencana.';
+    el('revNamaKegiatan').value = d.namaKegiatan || '';
+    el('revTujuan').value = d.tujuan || '';
+    el('revSasaran').value = d.sasaran || '';
+    el('revTargetOutput').value = d.targetOutput == null ? '' : d.targetOutput;
+    el('revSatuan').value = d.satuan || '';
+    el('revTargetPeserta').value = d.targetPeserta == null ? '' : d.targetPeserta;
+    el('revTanggalMulai').value = d.tanggalMulai || '';
+    el('revTanggalSelesai').value = d.tanggalSelesai || '';
+    el('revKabupaten').value = String(d.kabupatenKota || '').trim().toUpperCase();
+    el('revLokasi').value = d.lokasi || '';
+    el('revPenanggungJawab').value = d.penanggungJawab || '';
+    el('revAnggaran').value = d.anggaranRencana == null ? '' : d.anggaranRencana;
+    // Catatan baru dikosongkan agar alasan penolakan lama tidak digandakan/ditimpa.
+    el('revCatatan').value = '';
+    status('statusSimpanRevisi', 'Periksa alasan penolakan, lakukan perubahan, lalu simpan sebagai DRAF.');
+    el('editorRencanaDitolak').classList.remove('hidden');
+    el('editorRencanaDitolak').scrollIntoView({behavior:'smooth',block:'start'});
+    status('statusRencanaDitolak', 'Detail rencana ditolak berhasil dimuat.');
+  }, m => {
+    if (tombol) { tombol.disabled = false; tombol.textContent = 'Buka dan Perbaiki'; }
+    status('statusRencanaDitolak', 'Gagal membuka detail: ' + m);
+  });
+}
+
+function dataFormRevisiRencanaDitolak() {
+  return {
+    namaKegiatan: el('revNamaKegiatan').value.trim(),
+    tujuan: el('revTujuan').value.trim(),
+    sasaran: el('revSasaran').value.trim(),
+    targetOutput: Number(el('revTargetOutput').value),
+    satuan: el('revSatuan').value.trim(),
+    targetPeserta: Number(el('revTargetPeserta').value || 0),
+    tanggalMulai: el('revTanggalMulai').value,
+    tanggalSelesai: el('revTanggalSelesai').value,
+    kabupatenKota: el('revKabupaten').value,
+    lokasi: el('revLokasi').value.trim(),
+    penanggungJawab: el('revPenanggungJawab').value.trim(),
+    anggaranRencana: Number(el('revAnggaran').value || 0),
+    catatan: el('revCatatan').value.trim()
+  };
+}
+
+function simpanRevisiRencanaDitolak() {
+  if (!DETAIL_RENCANA_DITOLAK_AKTIF || !DETAIL_RENCANA_DITOLAK_AKTIF.idKegiatan) {
+    alert('Buka detail rencana ditolak terlebih dahulu.'); return;
+  }
+  const data = dataFormRevisiRencanaDitolak();
+  if (!data.namaKegiatan || !data.tujuan || !data.sasaran || !data.satuan || !data.kabupatenKota || !data.lokasi || !data.penanggungJawab || !data.tanggalMulai || !data.tanggalSelesai || el('revTargetOutput').value === '') {
+    alert('Lengkapi nama kegiatan, tujuan, sasaran, target output, satuan, tanggal, kabupaten/kota, lokasi, dan penanggung jawab.'); return;
+  }
+  const btn = el('btnSimpanRevisiRencana'); btn.disabled = true;
+  el('btnAjukanUlangRencana').disabled = true;
+  REVISI_RENCANA_SUDAH_DISIMPAN = false;
+  status('statusSimpanRevisi', 'Sedang memvalidasi dan menyimpan perbaikan...');
+  callServer('ubahDrafRencanaKegiatanPTLK', [TOKEN_LOGIN, DETAIL_RENCANA_DITOLAK_AKTIF.idKegiatan, data], hasil => {
+    btn.disabled = false;
+    if (!hasil || !hasil.ok) {
+      status('statusSimpanRevisi', hasil && hasil.pesan ? hasil.pesan : 'Perbaikan gagal disimpan.'); return;
+    }
+    REVISI_RENCANA_SUDAH_DISIMPAN = true;
+    DETAIL_RENCANA_DITOLAK_AKTIF.statusPersetujuan = 'DRAF';
+    el('btnAjukanUlangRencana').disabled = false;
+    status('statusSimpanRevisi', (hasil.pesan || 'Perbaikan berhasil disimpan.') + ' Status sekarang DRAF. Silakan ajukan ulang jika data sudah benar.');
+    pesan('Perbaikan rencana berhasil disimpan sebagai DRAF. Riwayat penolakan tetap dipertahankan.', 'ok');
+    muatDaftarRencanaDitolak();
+    muatDaftarSeluruhRencanaPTLK();
+  }, m => {
+    btn.disabled = false;
+    status('statusSimpanRevisi', 'Gagal menyimpan perbaikan: ' + m);
+  });
+}
+
+function ajukanUlangRencanaDitolak() {
+  if (!DETAIL_RENCANA_DITOLAK_AKTIF || !DETAIL_RENCANA_DITOLAK_AKTIF.idKegiatan) {
+    alert('Tidak ada rencana yang sedang diperbaiki.'); return;
+  }
+  if (!REVISI_RENCANA_SUDAH_DISIMPAN || String(DETAIL_RENCANA_DITOLAK_AKTIF.statusPersetujuan).toUpperCase() !== 'DRAF') {
+    alert('Simpan perbaikan sebagai DRAF terlebih dahulu sebelum mengajukan ulang.'); return;
+  }
+  if (!confirm('Ajukan ulang rencana yang sudah diperbaiki untuk diperiksa oleh verifikator?')) return;
+  const btn = el('btnAjukanUlangRencana'); btn.disabled = true;
+  status('statusSimpanRevisi', 'Sedang mengajukan ulang rencana...');
+  callServer('ajukanRencanaKegiatanPTLK', [TOKEN_LOGIN, DETAIL_RENCANA_DITOLAK_AKTIF.idKegiatan], hasil => {
+    if (!hasil || !hasil.ok) {
+      btn.disabled = false;
+      status('statusSimpanRevisi', hasil && hasil.pesan ? hasil.pesan : 'Pengajuan ulang gagal.'); return;
+    }
+    DETAIL_RENCANA_DITOLAK_AKTIF.statusPersetujuan = 'DIAJUKAN';
+    REVISI_RENCANA_SUDAH_DISIMPAN = false;
+    status('statusSimpanRevisi', hasil.pesan || 'Rencana berhasil diajukan ulang.');
+    pesan('Rencana berhasil diajukan ulang dan akan muncul kembali pada Panel Persetujuan Verifikator.', 'ok');
+    el('editorRencanaDitolak').classList.add('hidden');
+    DETAIL_RENCANA_DITOLAK_AKTIF = null;
+    muatDaftarRencanaDitolak();
+    muatDaftarPersetujuanRencana();
+    muatDaftarSeluruhRencanaPTLK();
+  }, m => {
+    btn.disabled = false;
+    status('statusSimpanRevisi', 'Gagal mengajukan ulang: ' + m);
+  });
+}
+
+function tutupEditorRencanaDitolak() {
+  el('editorRencanaDitolak').classList.add('hidden');
+  DETAIL_RENCANA_DITOLAK_AKTIF = null;
+  REVISI_RENCANA_SUDAH_DISIMPAN = false;
+}
+
+// Setiap perubahan setelah penyimpanan membatalkan kesiapan pengajuan ulang.
+['revNamaKegiatan','revTujuan','revSasaran','revTargetOutput','revSatuan','revTargetPeserta','revTanggalMulai','revTanggalSelesai','revKabupaten','revLokasi','revPenanggungJawab','revAnggaran','revCatatan'].forEach(id => {
+  const field = el(id);
+  if (field) {
+    const tandaiPerubahan = () => {
+    if (REVISI_RENCANA_SUDAH_DISIMPAN) {
+      REVISI_RENCANA_SUDAH_DISIMPAN = false;
+      el('btnAjukanUlangRencana').disabled = true;
+      status('statusSimpanRevisi', 'Ada perubahan baru yang belum disimpan. Simpan kembali sebelum mengajukan ulang.');
+    }
+    };
+    field.addEventListener('input', tandaiPerubahan);
+    field.addEventListener('change', tandaiPerubahan);
+  }
+});
+function muatPengajuanOperator() {
+  if (PERAN_PENGGUNA !== 'ADMIN_UTAMA') return;
+
+  status('statusPengajuanOperator', 'Memuat pengajuan operator...');
+
+  callServer(
+    'ambilPengajuanOperatorKabKotaPTLK',
+    [TOKEN_LOGIN],
+    hasil => {
+      // Server mengembalikan array pengajuan, bukan objek {ok, data}.
+      const list = Array.isArray(hasil) ? hasil : [];
+      const body = el('tabelPengajuanOperator');
+      body.innerHTML = '';
+
+      if (!list.length) {
+        body.innerHTML =
+          '<tr><td colspan="7">Belum ada pengajuan yang menunggu persetujuan.</td></tr>';
+        status('statusPengajuanOperator', 'Tidak ada pengajuan tertunda.');
+        return;
+      }
+
+      list.forEach(x => {
+        const tr = document.createElement('tr');
+
+        const id = String(x.ID_PENGAJUAN || '');
+        const wilayah = String(x.KABUPATEN_KOTA_DIAJUKAN || '');
+
+        const tombolSetuju = document.createElement('button');
+        tombolSetuju.className = 'small';
+        tombolSetuju.textContent = 'Setujui';
+        tombolSetuju.onclick = () => setujuiPengajuanOperator(id, wilayah);
+
+        const tombolTolak = document.createElement('button');
+        tombolTolak.className = 'small secondary';
+        tombolTolak.textContent = 'Tolak';
+        tombolTolak.style.marginLeft = '5px';
+        tombolTolak.onclick = () => tolakPengajuanOperator(id);
+
+        const kolomAksi = document.createElement('td');
+        kolomAksi.appendChild(tombolSetuju);
+        kolomAksi.appendChild(tombolTolak);
+
+        [
+          x.NAMA_LENGKAP,
+          x.NIP,
+          x.EMAIL,
+          x.NO_WA,
+          wilayah,
+          x.TANGGAL_PENGAJUAN
+        ].forEach(nilai => {
+          const td = document.createElement('td');
+          td.textContent = nilai || '-';
+          tr.appendChild(td);
+        });
+
+        tr.appendChild(kolomAksi);
+        body.appendChild(tr);
+      });
+
+      status(
+        'statusPengajuanOperator',
+        'Jumlah pengajuan menunggu: ' + list.length
+      );
+    },
+    m => status('statusPengajuanOperator', 'Gagal: ' + m)
+  );
+}
+
+
+function pindahWilayahOperator(email, wilayahLama) {
+  const wilayahBaru = prompt(
+    'Masukkan nama kabupaten/kota tujuan:\n' +
+    'Banggai, Banggai Kepulauan, Banggai Laut,\n' +
+    'Buol, Donggala, Morowali, Morowali Utara,\n' +
+    'Parigi Moutong, Poso, Sigi, Tojo Una-Una,\n' +
+    'Tolitoli, Kota Palu',
+    wilayahLama || ''
+  );
+
+  if (!wilayahBaru) return;
+
+  if (!confirm(
+    'Pindahkan operator ' + email +
+    ' ke wilayah ' + wilayahBaru + '?'
+  )) return;
+
+  callServer(
+    'pindahWilayahOperatorPTLK',
+    [TOKEN_LOGIN, email, wilayahBaru],
+    hasil => {
+      alert(hasil.pesan || 'Wilayah tugas berhasil diperbarui.');
+      muatDaftarKelolaOperator();
+    },
+    m => alert('Gagal memindahkan operator: ' + m)
+  );
+}
+
+
+function ubahStatusOperator(email, statusLama) {
+  const statusBaru =
+    String(statusLama || '').trim().toUpperCase() === 'AKTIF'
+      ? 'NONAKTIF'
+      : 'AKTIF';
+
+  if (!confirm(
+    'Ubah status operator ' + email +
+    ' menjadi ' + statusBaru + '?'
+  )) return;
+
+  callServer(
+    'ubahStatusOperatorPTLK',
+    [TOKEN_LOGIN, email, statusBaru],
+    hasil => {
+      alert(hasil.pesan || 'Status operator berhasil diperbarui.');
+      muatDaftarKelolaOperator();
+    },
+    m => alert('Gagal mengubah status: ' + m)
+  );
+}
+
+
+function hapusOperator(email) {
+  if (!confirm(
+    'PERINGATAN!\n\n' +
+    'Apakah Anda yakin ingin menghapus akun operator:\n' +
+    email + '?\n\n' +
+    'Akun akan dihapus dari MASTER_PENGGUNA. ' +
+    'Data tenaga, lembaga, dan riwayat aktivitas tidak ikut dihapus.'
+  )) return;
+
+  callServer(
+    'hapusOperatorPTLK',
+    [TOKEN_LOGIN, email],
+    hasil => {
+      alert(hasil.pesan || 'Akun operator berhasil dihapus.');
+      muatDaftarKelolaOperator();
+    },
+    m => alert('Gagal menghapus operator: ' + m)
+  );
+}
+
+
+const tombolHapus = document.createElement('button');
+tombolHapus.className = 'small secondary';
+tombolHapus.textContent = 'Hapus Operator';
+tombolHapus.style.marginLeft = '5px';
+tombolHapus.onclick = () => hapusOperator(x.email);
+
+aksi.appendChild(tombolPindah);
+aksi.appendChild(tombolNonaktif);
+aksi.appendChild(tombolHapus);
+
+
+function setujuiPengajuanOperator(id, wilayahDiajukan) {
+  const wilayah = prompt(
+    'Tetapkan wilayah tugas operator:',
+    wilayahDiajukan
+  );
+
+  if (wilayah === null) return;
+
+  const catatan = prompt('Catatan Admin (boleh dikosongkan):', '');
+  if (catatan === null) return;
+
+  if (!confirm('Setujui pengajuan dan aktifkan akun operator ini?')) return;
+
+  prosesKeputusanPengajuanOperator(
+    id, 'DISETUJUI', wilayah, catatan
+  );
+}
+
+function tolakPengajuanOperator(id) {
+  const catatan = prompt('Tuliskan alasan penolakan:');
+  if (catatan === null) return;
+
+  if (!catatan.trim()) {
+    alert('Alasan penolakan wajib diisi.');
+    return;
+  }
+
+  if (!confirm('Tolak pengajuan operator ini?')) return;
+
+  prosesKeputusanPengajuanOperator(
+    id, 'DITOLAK', '', catatan
+  );
+}
+
+function prosesKeputusanPengajuanOperator(
+  id, keputusan, wilayah, catatan
+) {
+  status('statusPengajuanOperator', 'Memproses keputusan Admin...');
+
+  callServer(
+    'prosesPengajuanOperatorKabKotaPTLK',
+    [TOKEN_LOGIN, id, keputusan, wilayah, catatan],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusPengajuanOperator',
+          hasil && hasil.pesan || 'Keputusan gagal diproses.'
+        );
+        return;
+      }
+
+      alert(hasil.pesan || 'Pengajuan berhasil diproses.');
+
+      muatPengajuanOperator();
+      if (keputusan === 'DISETUJUI') muatOperator();
+    },
+    m => status('statusPengajuanOperator', 'Gagal: ' + m)
+  );
+}
+function muatOperator(){if(PERAN_PENGGUNA!=='ADMIN_UTAMA')return;status('statusOperator','Memuat daftar operator...');callServer('ambilDaftarOperatorPTLK',[TOKEN_LOGIN],hasil=>{if(!hasil||!hasil.ok){status('statusOperator',hasil&&hasil.pesan||'Gagal memuat operator.');return;}const list=hasil.data||[];const body=el('tabelOperator');body.innerHTML='';list.forEach(x=>{const tr=document.createElement('tr');const email=String(x.email||'');tr.innerHTML='<td>'+escapeHtml(x.nama||'')+'</td><td>'+escapeHtml(email)+'</td><td>'+escapeHtml(x.peran||'')+'</td><td>'+escapeHtml(x.penugasan||'')+'</td><td>'+escapeHtml(x.wilayahTugas||'-')+'</td><td>'+escapeHtml(x.status||'')+'</td><td><button class="small secondary" onclick="ubahOperator(\''+escapeHtml(email).replace(/'/g,"\\'")+'\',\''+escapeHtml(x.wilayahTugas||'').replace(/'/g,"\\'")+'\')">Ubah</button></td>';body.appendChild(tr)});status('statusOperator','Jumlah operator: '+list.length);},m=>status('statusOperator','Gagal: '+m));}
+function aturFormOperatorWilayah(){const khusus=el('opPeran').value==='OPERATOR_KABKOTA';el('opWilayahWrap').classList.toggle('hidden',!khusus);if(khusus){el('opTugas').value='TENAGA,LEMBAGA';el('opTugas').disabled=true;}else{el('opTugas').disabled=false;}}
+el('opPeran').addEventListener('change',aturFormOperatorWilayah);
+function tambahOperator(){const nama=el('opNama').value.trim(),email=el('opEmail').value.trim(),peran=el('opPeran').value,tugas=el('opTugas').value,wilayah=el('opWilayah').value;if(!nama||!email)return alert('Nama dan email wajib diisi.');if(peran==='OPERATOR_KABKOTA'&&!wilayah)return alert('Pilih wilayah tugas operator.');callServer('tambahOperatorPTLK',[TOKEN_LOGIN,nama,email,peran,tugas,wilayah],hasil=>{if(!hasil||!hasil.ok){pesan(hasil&&hasil.pesan||'Operator gagal ditambahkan.','error');return;}pesan(hasil.pesan,'ok');el('opNama').value='';el('opEmail').value='';el('opPeran').value='OPERATOR_VERIFIKATOR';el('opWilayah').value='';aturFormOperatorWilayah();muatOperator()},m=>pesan(m,'error'));}
+function ubahOperator(email,wilayahSaatIni){const peran=prompt('Peran baru (OPERATOR_VERIFIKATOR / OPERATOR_PENGELOLA_DATA / OPERATOR_LAPORAN / OPERATOR_KABKOTA):');if(peran===null)return;const tugas=prompt('Penugasan (TENAGA,LEMBAGA):','TENAGA,LEMBAGA');if(tugas===null)return;let wilayah='';if(peran.trim().toUpperCase()==='OPERATOR_KABKOTA'){wilayah=prompt('Wilayah tugas (contoh: KABUPATEN BUOL):',wilayahSaatIni||'');if(wilayah===null)return;}const aktif=prompt('Status (AKTIF / NONAKTIF):','AKTIF');if(aktif===null)return;callServer('ubahPengaturanOperatorPTLK',[TOKEN_LOGIN,email,peran.trim().toUpperCase(),tugas.trim(),aktif.trim().toUpperCase(),wilayah],hasil=>{if(!hasil||!hasil.ok){pesan(hasil&&hasil.pesan||'Pengaturan gagal diubah.','error');return;}pesan(hasil.pesan,'ok');muatOperator()},m=>pesan(m,'error'));}
+
+function jalankanBackup(){if(!confirm('Buat salinan cadangan seluruh database PTLK sekarang?'))return;status('statusBackup','Backup sedang berjalan...');callServer('backupDatabasePTLK',[TOKEN_LOGIN],hasil=>{if(!hasil||!hasil.ok){status('statusBackup',hasil&&hasil.pesan||'Backup gagal.');return;}status('statusBackup',hasil.pesan+' '+hasil.namaFile);if(hasil.url)window.open(hasil.url,'_blank')},m=>status('statusBackup','Backup gagal: '+m));}
+function tesKoneksi(){status('statusBackup','Memeriksa koneksi database...');callServer('TES_KONEKSI_DATABASE_PTLK',[TOKEN_LOGIN],hasil=>status('statusBackup',hasil&&hasil.pesan?hasil.pesan:JSON.stringify(hasil)),m=>status('statusBackup','Koneksi gagal: '+m));}
+
+function keluarDashboard() {
+  if (!confirm('Keluar dari Arsip Digital PTLK?')) return;
+
+  const tombol = el('tombolKeluar');
+  if (tombol) tombol.disabled = true;
+
+  authDashboard.signOut()
+    .then(function () {
+      window.top.location.replace(
+        'https://script.google.com/macros/s/AKfycbxZngvwJbcHww5gbBugc9ESebWXi7tmEjFAeLA2TS_2AGEMHnQKmZHHushnVvcEKzqm6g/exec'
+      );
+    })
+    .catch(function (error) {
+      if (tombol) tombol.disabled = false;
+
+      pesan(
+        'Gagal keluar: ' + (error.message || 'Kesalahan autentikasi.'),
+        'error'
+      );
+    });
+}
+
+let IMPOR_PTLK_AKTIF = {};
+function togglePanelImporPTLK(){const p=el('panelImporPTLK');if(p)p.classList.toggle('hidden');}
+function toggleUjiReferensiPTLK(){const a=el('hasilUjiReferensi'),b=el('btnUjiReferensi');if(!a)return;const buka=a.classList.contains('hidden');a.classList.toggle('hidden',!buka);if(b)b.textContent=buka?'Tutup Hasil Uji Referensi':'Uji Referensi Perencanaan';if(buka&&a.textContent.trim()==='Belum diuji.')ujiReferensiProgramPTLK();}
+function unduhTemplateImporPTLK(jenis){callServer('ambilTemplateImporPTLK',[TOKEN_LOGIN,jenis],h=>{if(!h||!h.ok||!h.base64){pesan(h&&h.pesan||'Template gagal disiapkan.','error');return;}const bin=atob(h.base64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);const blob=new Blob([bytes],{type:h.mimeType||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=h.namaFile||('TEMPLATE_'+jenis+'.xlsx');document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);},m=>pesan('Gagal mengunduh template: '+m,'error'));}
+function pratinjauImporPTLK(jenis,inputId,areaId){
+  const f=el(inputId),a=el(areaId);
+  if(!f||!f.files||!f.files.length){alert('Pilih file Excel terlebih dahulu.');return;}
+  const file=f.files[0];
+  if(!/\.xlsx?$/i.test(file.name)){alert('File harus berformat .xlsx atau .xls.');return;}
+  if(file.size>10*1024*1024){alert('Ukuran file maksimal 10 MB.');return;}
+  if(typeof XLSX==='undefined'){a.textContent='Pustaka pembaca Excel belum termuat. Muat ulang aplikasi dan coba kembali.';a.className='message show error';return;}
+  a.textContent='Membaca file Excel dan memeriksa data...';a.className='message show';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const workbook=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      if(!workbook.SheetNames.length)throw new Error('Workbook tidak memiliki sheet.');
+      const worksheet=workbook.Sheets[workbook.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(worksheet,{defval:'',raw:false,blankrows:false});
+      if(!rows.length)throw new Error('Sheet pertama tidak memiliki baris data setelah header.');
+      callServer('pratinjauImporPTLK',[TOKEN_LOGIN,jenis,file.name,rows],function(h){
+        if(!h||!h.ok){a.textContent=h&&h.pesan||'Pratinjau gagal.';a.className='message show error';return;}
+        IMPOR_PTLK_AKTIF[jenis]=h.batchId;
+        const r=h.ringkasan||{};
+        a.replaceChildren();
+        const ring=document.createElement('div');
+        ring.textContent='Hasil pemeriksaan — Total: '+(r.total||0)+' | Valid: '+(r.valid||0)+' | Duplikat: '+(r.duplikat||0)+' | Tidak valid: '+(r.tidakValid||0);
+        a.appendChild(ring);
+        const wrap=document.createElement('div');wrap.className='table-wrap';wrap.style.marginTop='10px';
+        const table=document.createElement('table');
+        const thead=document.createElement('thead'),trh=document.createElement('tr');
+        ['Baris Excel','Status','Nama/Identitas','Catatan pemeriksaan'].forEach(t=>{const th=document.createElement('th');th.textContent=t;trh.appendChild(th);});
+        thead.appendChild(trh);table.appendChild(thead);
+        const tbody=document.createElement('tbody');
+        (h.baris||[]).forEach(x=>{const tr=document.createElement('tr');[x.baris,x.status,x.nama,x.catatan].forEach(v=>{const td=document.createElement('td');td.textContent=String(v==null?'':v);tr.appendChild(td);});tbody.appendChild(tr);});
+        table.appendChild(tbody);wrap.appendChild(table);a.appendChild(wrap);
+        const note=document.createElement('p');note.textContent=h.pesan||'Hanya baris VALID yang dapat disimpan.';a.appendChild(note);
+        if((r.valid||0)>0&&h.batchId){const btn=document.createElement('button');btn.className='success small';btn.type='button';btn.textContent='Konfirmasi Simpan '+r.valid+' Baris';btn.onclick=()=>konfirmasiImporPTLK(jenis,areaId,btn);a.appendChild(btn);}
+        a.className='message show ok';
+      },function(m){a.textContent='Pemeriksaan gagal: '+m;a.className='message show error';});
+    }catch(err){a.textContent='File Excel tidak dapat dibaca: '+err.message;a.className='message show error';}
+  };
+  reader.onerror=function(){a.textContent='File tidak dapat dibaca.';a.className='message show error';};
+  reader.readAsArrayBuffer(file);
+}
+function konfirmasiImporPTLK(jenis,areaId,btn){const id=IMPOR_PTLK_AKTIF[jenis];if(!id){alert('Pratinjau tidak ditemukan. Periksa ulang file.');return;}if(!confirm('Simpan data valid ke '+jenis+'? Data lama tidak akan ditimpa.'))return;btn.disabled=true;btn.textContent='Menyimpan...';callServer('konfirmasiImporPTLK',[TOKEN_LOGIN,jenis,id],h=>{const a=el(areaId);a.textContent=h&&h.pesan||'Proses impor selesai.';a.className='message show '+(h&&h.ok?'ok':'error');delete IMPOR_PTLK_AKTIF[jenis];if(h&&h.ok){muatAnalitik();if(jenis==='RENCANA_KEGIATAN_PTLK')muatDaftarSeluruhRencanaPTLK();}},m=>{btn.disabled=false;btn.textContent='Ulangi Konfirmasi';const a=el(areaId);a.textContent='Impor gagal: '+m;a.className='message show error';});}
+
+function ujiReferensiProgramPTLK() {
+  const area = el('hasilUjiReferensi');
+
+  area.textContent = 'Sedang membaca referensi modul perencanaan...';
+
+  const tahun = new Date().getFullYear();
+
+  callServer(
+    'ambilReferensiProgramPTLK',
+    [TOKEN_LOGIN, tahun],
+
+    function(hasil) {
+      area.textContent = JSON.stringify(
+        hasil,
+        null,
+        2
+      );
+    },
+
+    function(error) {
+      area.textContent =
+        'GAGAL MEMBACA REFERENSI:\n' + error;
+    }
+  );
+}
+
+function ujiDaftarKegiatanDisetujuiPTLK() {
+  const area = el('hasilUjiPelaksanaan');
+  const tombol = document.querySelector(
+    'button[onclick="ujiDaftarKegiatanDisetujuiPTLK()"]'
+  );
+  if (tombol) tombol.textContent = 'Uji Daftar Kegiatan Disetujui';
+  if (!area) {
+    alert('Area hasil pengujian tidak ditemukan.');
+    return;
+  }
+
+  // Jika hasil sedang terlihat, sembunyikan
+  if (area.style.display !== 'none' && area.style.display !== '') {
+    area.style.display = 'none';
+    return;
+  }
+
+  // Tampilkan area hasil
+  area.style.display = 'block';
+  area.textContent = 'Sedang membaca kegiatan yang telah disetujui...';
+
+  if (tombol) tombol.textContent = 'Sembunyikan Hasil Uji';
+
+  callServer(
+    'ambilDaftarKegiatanDisetujuiPTLK',
+    [TOKEN_LOGIN, {}],
+
+    function(hasil) {
+      area.textContent = JSON.stringify(hasil, null, 2);
+    },
+
+    function(error) {
+      area.textContent = 'GAGAL MEMBACA KEGIATAN:\n' + error;
+    }
+  );
+}
+
+function ujiBacaRealisasiKegiatanPTLK() {
+  const area = el('hasilUjiBacaRealisasi');
+
+  const idKegiatan = 'KGT-20261110-000722-5DE75185';
+
+  area.textContent = 'Sedang membaca realisasi kegiatan...';
+
+  callServer(
+    'ambilRealisasiKegiatanPTLK',
+    [TOKEN_LOGIN, idKegiatan],
+
+    function(hasil) {
+      area.textContent = JSON.stringify(
+        hasil,
+        null,
+        2
+      );
+    },
+
+    function(error) {
+      area.textContent =
+        'GAGAL MEMBACA REALISASI:\n' + error;
+    }
+  );
+}
+el('identitasPengguna').textContent='Nama: '+NAMA_PENGGUNA+' | Email: '+EMAIL_PENGGUNA+' | Peran: '+PERAN_PENGGUNA+' | Penugasan: '+(PENUGASAN_PENGGUNA||'-')+(WILAYAH_TUGAS_PENGGUNA?' | Wilayah: '+WILAYAH_TUGAS_PENGGUNA:'');
+if(PERAN_PENGGUNA!=='ADMIN_UTAMA'){el('panelOperator').classList.add('hidden');el('panelBackup').classList.add('hidden')}
+if(PERAN_PENGGUNA!=='OPERATOR_KABKOTA'){
+  aturPanelDaftarSeluruhRencanaPTLK();
+  aturPanelPersetujuanRencana();
+  aturPanelRencanaDitolak();
+}
+if(!['ADMIN_UTAMA','OPERATOR_LAPORAN'].includes(PERAN_PENGGUNA)){el('btnEksporExcel').classList.add('hidden');el('btnEksporPDF').classList.add('hidden')}
+if(PERAN_PENGGUNA==='OPERATOR_KABKOTA'){
+  if(!WILAYAH_TUGAS_PENGGUNA)throw new Error('Wilayah tugas akun belum ditetapkan.');
+  el('panelDaftarSeluruhRencana').classList.add('hidden');
+  el('panelPersetujuanRencana').classList.add('hidden');
+  el('panelRencanaDitolak').classList.add('hidden');
+  const tombolProgram=document.querySelector('button[onclick="bukaFormInputProgramPTLK()"]');if(tombolProgram)tombolProgram.classList.add('hidden');
+  el('imporProgramCard').classList.add('hidden');el('imporRencanaCard').classList.add('hidden');
+  el('filterWilayah').disabled=true;
+  el('panelVerifikasiData').querySelector('h2').textContent='Data Wilayah Tugas: '+WILAYAH_TUGAS_PENGGUNA;
+}
+muatAnalitik();
+
+function bukaFormInputProgramPTLK() {
+  const area = document.getElementById('areaData');
+
+  if (!area) {
+    alert('Area formulir belum ditemukan.');
+    return;
+  }
+
+  if (area.innerHTML.trim()) { area.innerHTML = ''; return; }
+
+  area.innerHTML = `
+    <section class="panel">
+      <div class="actions" style="justify-content:space-between"><h2>INPUT PROGRAM PTLK</h2><button type="button" class="secondary small" onclick="bukaFormInputProgramPTLK()">Tutup Form</button></div>
+      <p>Formulir perencanaan program dan kegiatan PTLK.</p>
+
+      <div class="form-group">
+        <label>Tahun Anggaran</label>
+        <input type="number" id="ptlkTahun" value="2026">
+      </div>
+
+      <div class="form-group">
+        <label>Kode Program SIPD</label>
+        <input type="text" id="ptlkKodeProgram">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Program</label>
+        <input type="text" id="ptlkNamaProgram">
+      </div>
+
+      <div class="form-group">
+        <label>Kode Kegiatan SIPD</label>
+        <input type="text" id="ptlkKodeKegiatan">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Kegiatan</label>
+        <input type="text" id="ptlkNamaKegiatan">
+      </div>
+
+      <div class="form-group">
+        <label>Kode Subkegiatan SIPD</label>
+        <input type="text" id="ptlkKodeSub">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Subkegiatan</label>
+        <input type="text" id="ptlkNamaSub">
+      </div>
+
+      <div class="form-group">
+        <label>Penanggung Jawab</label>
+        <input type="text" id="ptlkPenanggungJawab">
+      </div>
+
+      <div class="form-group">
+        <label>Pagu Anggaran (Rp)</label>
+        <input type="number" id="ptlkPagu" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>Indikator Kinerja</label>
+        <select id="ptlkIndikator">
+          <option value="">Memuat indikator...</option>
+        </select>
+        <p id="ptlkInfoTarget"></p>
+      </div>
+
+      <div class="form-group">
+        <label>Catatan</label>
+        <textarea id="ptlkCatatan"></textarea>
+      </div>
+
+      <button type="button" onclick="simpanFormProgramPTLK()">
+        Simpan Program
+      </button>
+    </section>
+  `;
+
+  google.script.run
+    .withSuccessHandler(function(hasil) {
+      const pilih = document.getElementById('ptlkIndikator');
+
+      if (!hasil || !hasil.ok) {
+        pilih.innerHTML = '<option value="">Gagal memuat indikator</option>';
+        return;
+      }
+
+      pilih.innerHTML = '<option value="">Pilih indikator</option>';
+
+      hasil.indikator.forEach(function(item) {
+        const opsi = document.createElement('option');
+        opsi.value = item.kode;
+        opsi.textContent = item.nama + ' — Target: ' +
+          (Number(item.target) * 100).toFixed(2) + '% (' +
+          item.statusTarget + ')';
+
+        pilih.appendChild(opsi);
+      });
+
+    })
+    .withFailureHandler(function(error) {
+      alert('Gagal mengambil indikator: ' + error.message);
+    })
+    .ambilReferensiProgramPTLK(TOKEN_LOGIN, 2026);
+}
+
+function simpanFormProgramPTLK() {
+  const data = {
+    tahun: Number(document.getElementById('ptlkTahun').value),
+    kodeProgram: document.getElementById('ptlkKodeProgram').value,
+    namaProgram: document.getElementById('ptlkNamaProgram').value,
+    kodeKegiatan: document.getElementById('ptlkKodeKegiatan').value,
+    namaKegiatan: document.getElementById('ptlkNamaKegiatan').value,
+    kodeSubkegiatan: document.getElementById('ptlkKodeSub').value,
+    namaSubkegiatan: document.getElementById('ptlkNamaSub').value,
+    kodeIndikator: document.getElementById('ptlkIndikator').value,
+    paguAnggaran: Number(document.getElementById('ptlkPagu').value),
+    penanggungJawab: document.getElementById('ptlkPenanggungJawab').value,
+    catatan: document.getElementById('ptlkCatatan').value
+  };
+
+  if (!data.namaProgram || !data.namaKegiatan ||
+      !data.namaSubkegiatan || !data.kodeIndikator) {
+    alert('Lengkapi nama program, kegiatan, subkegiatan, dan indikator.');
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(function(hasil) {
+      if (hasil && hasil.ok) {
+        alert('Program berhasil disimpan. ID: ' + hasil.idProgram);
+        bukaFormInputProgramPTLK();
+      } else {
+        alert('Program belum tersimpan: ' +
+          (hasil && hasil.pesan ? hasil.pesan : 'Terjadi kesalahan.'));
+      }
+    })
+    .withFailureHandler(function(error) {
+      alert('Kesalahan penyimpanan: ' + error.message);
+    })
+    .simpanProgramPTLK(TOKEN_LOGIN, data);
+}
+
+function toggleUjiRealisasi() {
+  const area = document.getElementById('hasilUjiBacaRealisasi');
+
+  if (!area) {
+    pesan('Area hasil pengujian realisasi tidak ditemukan.', 'error');
+    return;
+  }
+
+  // Jika hasil sedang tampil, sembunyikan.
+  if (area.style.display === 'block') {
+    area.style.display = 'none';
+    return;
+  }
+
+  // Tampilkan area hasil.
+  area.style.display = 'block';
+  area.textContent = 'Sedang membaca data realisasi kegiatan...';
+
+  const idKegiatan = 'KGT-20261110-000722-5DE75185';
+
+  callServer(
+    'ambilRealisasiKegiatanPTLK',
+    [TOKEN_LOGIN, idKegiatan],
+    function(hasil) {
+      area.textContent = JSON.stringify(hasil, null, 2);
+    },
+    function(error) {
+      area.textContent =
+        'GAGAL MEMBACA REALISASI:\n' + error;
+    }
+  );
+}
+
+/* =====================================================
+   MODUL PESERTA KEGIATAN PTLK
+   ===================================================== */
+
+let PTLK_PESERTA_TENAGA = [];
+let PTLK_PESERTA_LEMBAGA = [];
+let PTLK_PESERTA_DAFTAR = [];
+
+const PTLK_PESERTA_STATUS = [
+  'BELUM DIKONFIRMASI',
+  'HADIR',
+  'TIDAK HADIR',
+  'IZIN',
+  'SAKIT'
+];
+
+function PTLK_PESERTA_AKSES() {
+  const peran = String(PERAN_PENGGUNA || '')
+    .trim()
+    .toUpperCase();
+
+  return peran === 'ADMIN_UTAMA' ||
+         peran === 'OPERATOR_PENGOLAH_DATA';
+}
+
+function aturPanelPesertaKegiatanPTLK() {
+  const panel = el('panelPesertaKegiatan');
+  if (!panel) return;
+
+  if (!PTLK_PESERTA_AKSES()) {
+    panel.classList.add('hidden');
+    return;
+  }
+
+  panel.classList.remove('hidden');
+  PTLK_PESERTA_MUAT_REFERENSI();
+}
+
+function PTLK_HIBAH_AKSES() {
+  const peran = String(PERAN_PENGGUNA || '')
+    .trim()
+    .toUpperCase();
+
+  return [
+    'ADMIN_UTAMA',
+    'OPERATOR_PENGOLAH_DATA',
+    'OPERATOR_PENGELOLA_DATA'
+  ].includes(peran);
+}
+
+function aturPanelManajemenHibahPTLK() {
+  const panel = el('panelManajemenHibah');
+  if (!panel) return;
+
+  if (!PTLK_HIBAH_AKSES()) {
+    panel.classList.add('hidden');
+    return;
+  }
+
+  panel.classList.remove('hidden');
+  muatDataHibahDashboardPTLK();
+}
+
+function PTLK_HIBAH_MUAT_PILIHAN_PENETAPAN() {
+  google.script.run
+    .withSuccessHandler(function(res) {
+      const select = el('penetapanIdHibah');
+      if (!select) return;
+
+      select.innerHTML =
+        '<option value="">Pilih data hibah</option>';
+
+      if (!res || !res.ok || !Array.isArray(res.data)) return;
+
+      res.data.forEach(function(item) {
+        const option = document.createElement('option');
+        option.value = item.idHibah;
+        option.textContent =
+          item.idHibah + ' - ' + item.namaLembaga;
+        select.appendChild(option);
+      });
+    })
+    .withFailureHandler(function(err) {
+      status(
+        'statusPenetapanHibah',
+        'Gagal memuat pilihan hibah: ' + err.message
+      );
+    })
+    .ambilMasterHibahPTLK(TOKEN_LOGIN, {});
+}
+
+function bukaPanelPenetapanHibahPTLK() {
+  if (!PTLK_HIBAH_AKSES()) {
+    alert('Anda tidak memiliki akses ke Penetapan Hibah.');
+    return;
+  }
+
+  const panel = el('panelPenetapanHibah');
+
+  if (!panel) {
+    alert('Panel Penetapan Hibah tidak ditemukan.');
+    return;
+  }
+
+  // Sembunyikan hanya panel hibah
+  [
+    'panelManajemenHibah',
+    'panelPengajuanHibah',
+    'panelPenyaluranHibah',
+    'panelPenetapanHibah'
+  ].forEach(function(id) {
+    const p = el(id);
+    if (p) p.classList.add('hidden');
+  });
+
+  panel.classList.remove('hidden');
+
+  PTLK_HIBAH_MUAT_PILIHAN_PENETAPAN();
+  muatPenetapanHibahDashboardPTLK();
+}
+
+function simpanPenetapanHibahDashboardPTLK() {
+  const data = {
+    idHibah: el('penetapanIdHibah').value,
+    tanggalPenetapan: el('penetapanTanggal').value,
+    nomorSK: el('penetapanNomorSK').value.trim(),
+    pejabatPenetap: el('penetapanPejabat').value.trim(),
+    nilaiDitetapkan: el('penetapanNilai').value,
+    tautanSK: el('penetapanTautanSK').value.trim(),
+    catatan: el('penetapanCatatan').value.trim()
+  };
+
+  if (!data.idHibah || !data.nomorSK ||
+      !data.pejabatPenetap || !data.nilaiDitetapkan) {
+    status(
+      'statusPenetapanHibah',
+      'Lengkapi ID Hibah, nomor SK, pejabat penetap, dan nilai bantuan.'
+    );
+    return;
+  }
+
+  status('statusPenetapanHibah', 'Sedang menyimpan penetapan...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res || !res.ok) {
+        status(
+          'statusPenetapanHibah',
+          res ? res.pesan : 'Penetapan gagal disimpan.'
+        );
+        return;
+      }
+
+      status(
+        'statusPenetapanHibah',
+        res.pesan + ' ID: ' + res.idPenetapan
+      );
+
+      el('penetapanNomorSK').value = '';
+      el('penetapanPejabat').value = '';
+      el('penetapanNilai').value = '';
+      el('penetapanTautanSK').value = '';
+      el('penetapanCatatan').value = '';
+
+      muatPenetapanHibahDashboardPTLK();
+    })
+    .withFailureHandler(function(err) {
+      status(
+        'statusPenetapanHibah',
+        'Kesalahan: ' + err.message
+      );
+    })
+    .simpanPenetapanHibahPTLK(TOKEN_LOGIN, data);
+}
+
+function muatPenetapanHibahDashboardPTLK() {
+  const tbody = el('daftarPenetapanHibah');
+  if (!tbody) return;
+
+  tbody.innerHTML =
+    '<tr><td colspan="8">Memuat data...</td></tr>';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res || !res.ok) {
+        tbody.innerHTML =
+          '<tr><td colspan="8">Gagal memuat data penetapan.</td></tr>';
+
+        status(
+          'statusPenetapanHibah',
+          res ? res.pesan : 'Gagal membaca data.'
+        );
+        return;
+      }
+
+      if (!res.data || res.data.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="8">Belum ada data penetapan.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+
+      res.data.forEach(function(item, index) {
+        const tr = document.createElement('tr');
+
+        const tanggal = item.tanggalPenetapan
+          ? new Date(item.tanggalPenetapan).toLocaleDateString('id-ID')
+          : '-';
+
+        const nilai = Number(item.nilaiDitetapkan || 0)
+          .toLocaleString('id-ID');
+
+        const kolom = [
+          index + 1,
+          item.idHibah || '-',
+          tanggal,
+          item.nomorSK || '-',
+          item.pejabatPenetap || '-',
+          'Rp ' + nilai,
+          item.statusPenetapan || '-'
+        ];
+
+        kolom.forEach(function(teks) {
+          const td = document.createElement('td');
+          td.textContent = teks;
+          tr.appendChild(td);
+        });
+
+        const tdDokumen = document.createElement('td');
+
+        if (item.tautanSK) {
+          const link = document.createElement('a');
+          link.href = item.tautanSK;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Lihat SK';
+          tdDokumen.appendChild(link);
+        } else {
+          tdDokumen.textContent = '-';
+        }
+
+        tr.appendChild(tdDokumen);
+        tbody.appendChild(tr);
+      });
+    })
+    .withFailureHandler(function(err) {
+      tbody.innerHTML =
+        '<tr><td colspan="8">Kesalahan: ' +
+        err.message + '</td></tr>';
+    })
+    .ambilPenetapanHibahPTLK(TOKEN_LOGIN, {});
+}
+
+
+function PTLK_PESERTA_MUAT_REFERENSI() {
+  status('statusPesertaKegiatan', 'Memuat kegiatan, tenaga, dan lembaga...');
+
+  callServer(
+    'ambilDaftarRencanaKegiatanPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusPesertaKegiatan',
+          hasil && hasil.pesan || 'Gagal membaca daftar kegiatan.'
+        );
+        return;
+      }
+
+      const kegiatan = (hasil.data || []).filter(x =>
+        String(x.statusPersetujuan || '').trim().toUpperCase() === 'DISETUJUI'
+      );
+
+      const pilih = el('pesertaPilihKegiatan');
+      pilih.innerHTML = '<option value="">Pilih kegiatan yang disetujui</option>';
+
+      kegiatan.forEach(x => {
+        const op = document.createElement('option');
+        op.value = x.idKegiatan;
+        op.textContent = x.namaKegiatan + ' — ' + x.kabupatenKota;
+        pilih.appendChild(op);
+      });
+
+      if (!kegiatan.length) {
+        status('statusPesertaKegiatan', 'Belum ada kegiatan yang disetujui.');
+      }
+
+      PTLK_PESERTA_MUAT_SUMBER();
+    },
+    m => status('statusPesertaKegiatan', 'Gagal memuat kegiatan: ' + m)
+  );
+}
+
+function PTLK_PESERTA_MUAT_SUMBER() {
+  callServer(
+    'ambilDataVerifikasiPTLK',
+    [TOKEN_LOGIN, 'TENAGA'],
+    hasil => {
+      PTLK_PESERTA_TENAGA =
+        hasil && hasil.ok && Array.isArray(hasil.data) ? hasil.data : [];
+
+      PTLK_PESERTA_ISI_SUMBER();
+    },
+    m => status('statusPesertaKegiatan', 'Gagal membaca tenaga: ' + m)
+  );
+
+  callServer(
+    'ambilDataVerifikasiPTLK',
+    [TOKEN_LOGIN, 'LEMBAGA'],
+    hasil => {
+      PTLK_PESERTA_LEMBAGA =
+        hasil && hasil.ok && Array.isArray(hasil.data) ? hasil.data : [];
+
+      PTLK_PESERTA_ISI_SUMBER();
+    },
+    m => status('statusPesertaKegiatan', 'Gagal membaca lembaga: ' + m)
+  );
+}
+
+function PTLK_PESERTA_ISI_SUMBER() {
+  const jenis = el('pesertaJenis').value;
+  const daftar = jenis === 'TENAGA'
+    ? PTLK_PESERTA_TENAGA
+    : PTLK_PESERTA_LEMBAGA;
+
+  const pilih = el('pesertaPilihSumber');
+  pilih.innerHTML = '<option value="">Pilih peserta</option>';
+
+  daftar.forEach(x => {
+    const id = jenis === 'TENAGA' ? x.ID_TENAGA : x.ID_LEMBAGA;
+    const nama = jenis === 'TENAGA' ? x.NAMA_LENGKAP : x.NAMA_LEMBAGA;
+
+    if (!id || !nama) return;
+
+    const op = document.createElement('option');
+    op.value = id;
+    op.textContent = nama + ' — ' + id;
+    pilih.appendChild(op);
+  });
+}
+
+function PTLK_PESERTA_SIMPAN() {
+  if (!PTLK_PESERTA_AKSES()) {
+    alert('Akses modul tidak diizinkan.');
+    return;
+  }
+
+  const idKegiatan = el('pesertaPilihKegiatan').value;
+  const jenis = el('pesertaJenis').value;
+  const idSumber = el('pesertaPilihSumber').value;
+  const peran = el('pesertaPeran').value.trim();
+
+  if (!idKegiatan) return alert('Pilih kegiatan terlebih dahulu.');
+  if (!idSumber) return alert('Pilih tenaga atau lembaga.');
+  if (!peran) return alert('Isi peran peserta.');
+
+  const daftar = jenis === 'TENAGA'
+    ? PTLK_PESERTA_TENAGA
+    : PTLK_PESERTA_LEMBAGA;
+
+  const sumber = daftar.find(x =>
+    String(jenis === 'TENAGA' ? x.ID_TENAGA : x.ID_LEMBAGA) === String(idSumber)
+  );
+
+  if (!sumber) return alert('Data peserta tidak ditemukan.');
+
+  const data = {
+    idKegiatan: idKegiatan,
+    jenisPeserta: jenis,
+    idTenaga: jenis === 'TENAGA' ? idSumber : '',
+    idLembaga: jenis === 'LEMBAGA' ? idSumber : '',
+    namaPeserta: jenis === 'TENAGA'
+      ? sumber.NAMA_LENGKAP
+      : sumber.NAMA_LEMBAGA,
+    asalLembaga: jenis === 'TENAGA'
+      ? (sumber.ORGANISASI_KELEMBAGAAN || '')
+      : (sumber.KABUPATEN_KOTA || ''),
+    peranPeserta: peran,
+    keterangan: el('pesertaKeterangan').value.trim()
+  };
+
+  status('statusPesertaKegiatan', 'Menyimpan peserta...');
+
+  callServer(
+    'simpanPesertaKegiatanPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusPesertaKegiatan',
+          hasil && hasil.pesan || 'Peserta gagal disimpan.'
+        );
+        return;
+      }
+
+      el('pesertaPeran').value = '';
+      el('pesertaKeterangan').value = '';
+
+      status('statusPesertaKegiatan', hasil.pesan || 'Peserta berhasil ditambahkan.');
+      PTLK_PESERTA_MUAT_DAFTAR();
+    },
+    m => status('statusPesertaKegiatan', 'Gagal menyimpan peserta: ' + m)
+  );
+}
+
+function PTLK_PESERTA_MUAT_DAFTAR() {
+  const idKegiatan = el('pesertaPilihKegiatan').value;
+  const body = el('tabelPesertaKegiatan');
+
+  if (!idKegiatan) {
+    body.innerHTML = '<tr><td colspan="7">Pilih kegiatan terlebih dahulu.</td></tr>';
+    return;
+  }
+
+  status('statusPesertaKegiatan', 'Membaca daftar peserta...');
+
+  callServer(
+    'ambilPesertaKegiatanPTLK',
+    [TOKEN_LOGIN, idKegiatan],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        body.innerHTML = '<tr><td colspan="7">Gagal membaca peserta.</td></tr>';
+        status('statusPesertaKegiatan', hasil && hasil.pesan || 'Gagal membaca peserta.');
+        return;
+      }
+
+      PTLK_PESERTA_DAFTAR = hasil.data || [];
+      PTLK_PESERTA_RENDER();
+
+      status(
+        'statusPesertaKegiatan',
+        'Jumlah peserta terdaftar: ' + PTLK_PESERTA_DAFTAR.length
+      );
+    },
+    m => status('statusPesertaKegiatan', 'Gagal membaca peserta: ' + m)
+  );
+}
+
+function PTLK_PESERTA_RENDER() {
+  const body = el('tabelPesertaKegiatan');
+  body.innerHTML = '';
+
+  if (!PTLK_PESERTA_DAFTAR.length) {
+    body.innerHTML = '<tr><td colspan="7">Belum ada peserta terdaftar.</td></tr>';
+    return;
+  }
+
+  PTLK_PESERTA_DAFTAR.forEach(x => {
+    const tr = document.createElement('tr');
+
+    function sel(value) {
+      const td = document.createElement('td');
+      td.textContent = value || '-';
+      tr.appendChild(td);
+    }
+
+    sel(x.namaPeserta);
+    sel(x.jenisPeserta);
+    sel(x.asalLembaga);
+    sel(x.peranPeserta);
+
+    const tdStatus = document.createElement('td');
+    const pilihStatus = document.createElement('select');
+
+    PTLK_PESERTA_STATUS.forEach(s => {
+      const op = document.createElement('option');
+      op.value = s;
+      op.textContent = s;
+      pilihStatus.appendChild(op);
+    });
+
+    pilihStatus.value = x.statusKehadiran || 'BELUM DIKONFIRMASI';
+    tdStatus.appendChild(pilihStatus);
+    tr.appendChild(tdStatus);
+
+    const tdKet = document.createElement('td');
+    const inputKet = document.createElement('input');
+    inputKet.value = x.keterangan || '';
+    inputKet.placeholder = 'Keterangan';
+    tdKet.appendChild(inputKet);
+    tr.appendChild(tdKet);
+
+    const tdAksi = document.createElement('td');
+    const tombol = document.createElement('button');
+    tombol.type = 'button';
+    tombol.className = 'small success';
+    tombol.textContent = 'Simpan';
+
+    tombol.addEventListener('click', () => {
+      tombol.disabled = true;
+
+      callServer(
+        'ubahKehadiranPesertaPTLK',
+        [
+          TOKEN_LOGIN,
+          x.idPartisipasi,
+          pilihStatus.value,
+          inputKet.value.trim()
+        ],
+        hasil => {
+          tombol.disabled = false;
+
+          if (!hasil || !hasil.ok) {
+            alert(hasil && hasil.pesan || 'Kehadiran gagal diperbarui.');
+            return;
+          }
+
+          status('statusPesertaKegiatan', hasil.pesan || 'Kehadiran berhasil diperbarui.');
+          PTLK_PESERTA_MUAT_DAFTAR();
+        },
+        m => {
+          tombol.disabled = false;
+          alert('Gagal memperbarui kehadiran: ' + m);
+        }
+      );
+    });
+
+    tdAksi.appendChild(tombol);
+    tr.appendChild(tdAksi);
+    body.appendChild(tr);
+  });
+}
+
+el('pesertaPilihKegiatan').addEventListener(
+  'change',
+  PTLK_PESERTA_MUAT_DAFTAR
+);
+
+aturPanelPesertaKegiatanPTLK();
+aturPanelManajemenHibahPTLK();
+aturPanelPenetapanHibahPTLK();
+// NAVIGASI PANEL MONEV KEGIATAN PTLK
+function bukaPanelMonevKegiatanPTLK() {
+  const panel = el('panelMonevKegiatan');
+
+  if (!panel) {
+    alert('Panel Monev Kegiatan PTLK belum ditemukan.');
+    return;
+  }
+
+  // Tutup panel Hibah
+  [
+    'panelManajemenHibah',
+    'panelPengajuanHibah',
+    'panelPenyaluranHibah',
+    'panelPenetapanHibah',
+    'panelLPJHibah',
+    'panelMonevHibah'
+  ].forEach(function(id) {
+    const p = el(id);
+    if (p) p.classList.add('hidden');
+  });
+
+  // Tampilkan panel Monev Kegiatan
+  panel.classList.remove('hidden');
+
+  // Muat daftar kegiatan yang telah disetujui
+  muatPilihanKegiatanMonevPTLK();
+}
+
+
+if (PTLK_HIBAH_AKSES()) {
+  PTLK_HIBAH_MUAT_PILIHAN();
+  PTLK_HIBAH_MUAT_PILIHAN_PENYALURAN();
+  PTLK_HIBAH_MUAT_PILIHAN_PENETAPAN();
+}
+
+function simpanDataHibahDashboardPTLK() {
+  const data = {
+    tahunAnggaran: el('hibahTahun').value,
+    namaLembaga: el('hibahNamaLembaga').value.trim(),
+    namaPenanggungJawab: el('hibahPenanggungJawab').value.trim(),
+    kabupatenKota: el('hibahWilayah').value.trim(),
+    jenisHibah: el('hibahJenis').value,
+    namaBantuan: el('hibahNamaBantuan').value.trim(),
+    jumlahBantuan: el('hibahJumlah').value,
+    volume: el('hibahVolume').value,
+    satuan: el('hibahSatuan').value.trim(),
+    sumberAnggaran: el('hibahSumber').value.trim(),
+    tujuanHibah: el('hibahTujuan').value.trim(),
+    catatan: el('hibahCatatan').value.trim()
+  };
+
+  if (!data.namaLembaga || !data.jenisHibah ||
+      !data.namaBantuan || !data.jumlahBantuan) {
+    status('statusManajemenHibah',
+      'Lengkapi nama lembaga, jenis hibah, nama bantuan, dan nilai bantuan.');
+    return;
+  }
+
+  status('statusManajemenHibah', 'Sedang menyimpan data hibah...');
+
+  callServer(
+    'simpanMasterHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusManajemenHibah',
+          hasil && hasil.pesan || 'Gagal menyimpan data hibah.');
+        return;
+      }
+
+      status('statusManajemenHibah',
+        hasil.pesan + ' ID: ' + hasil.idHibah);
+
+      [
+        'hibahNamaLembaga',
+        'hibahPenanggungJawab',
+        'hibahWilayah',
+        'hibahJenis',
+        'hibahNamaBantuan',
+        'hibahJumlah',
+        'hibahVolume',
+        'hibahSatuan',
+        'hibahSumber',
+        'hibahTujuan',
+        'hibahCatatan'
+      ].forEach(id => {
+        el(id).value = '';
+      });
+
+      muatDataHibahDashboardPTLK();
+    },
+    error => status('statusManajemenHibah',
+      'Gagal menyimpan: ' + error)
+  );
+}
+
+function muatDataHibahDashboardPTLK() {
+  status('statusManajemenHibah', 'Sedang membaca data hibah...');
+
+  callServer(
+    'ambilMasterHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusManajemenHibah',
+          hasil && hasil.pesan || 'Gagal membaca data hibah.');
+        return;
+      }
+
+      const tbody = el('daftarDataHibah');
+      tbody.innerHTML = '';
+
+      if (!hasil.data || !hasil.data.length) {
+        const tr = tbody.insertRow();
+        const td = tr.insertCell();
+        td.colSpan = 8;
+        td.textContent = 'Belum ada data hibah.';
+      } else {
+        hasil.data.forEach((x, i) => {
+          const tr = tbody.insertRow();
+
+          [
+            i + 1,
+            x.idHibah,
+            x.tahunAnggaran,
+            x.namaLembaga,
+            x.jenisHibah,
+            x.namaBantuan,
+            Number(x.jumlahBantuan || 0).toLocaleString('id-ID'),
+            x.statusHibah
+          ].forEach(nilai => {
+            const td = tr.insertCell();
+            td.textContent = nilai == null ? '' : nilai;
+          });
+        });
+      }
+
+      status('statusManajemenHibah',
+        'Data hibah berhasil dimuat. Jumlah: ' + hasil.jumlah);
+    },
+    error => status('statusManajemenHibah',
+      'Gagal membaca data: ' + error)
+  );
+}
+
+function ujiDatabaseHibahDashboardPTLK() {
+  const hasil = el('hasilUjiDatabaseHibah');
+
+  if (!hasil) {
+    alert('Tempat menampilkan hasil pengujian tidak ditemukan.');
+    return;
+  }
+
+  hasil.textContent = 'Sedang memeriksa database hibah...';
+
+  callServer(
+    'ujiDatabaseHibahPTLK',
+    [TOKEN_LOGIN],
+    data => {
+      if (data && data.ok) {
+        hasil.textContent =
+          data.pesan +
+          '\nJumlah sheet: ' + data.jumlahSheet +
+          '\nJumlah data hibah: ' + data.jumlahDataHibah;
+      } else {
+        hasil.textContent =
+          (data && data.pesan) || 'Pemeriksaan gagal.';
+      }
+    },
+    error => {
+      hasil.textContent = 'Gagal menguji database: ' + error;
+    }
+  );
+}
+
+function PTLK_HIBAH_MUAT_PILIHAN() {
+  callServer(
+    'ambilMasterHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusPengajuanHibah',
+          hasil && hasil.pesan || 'Gagal membaca data hibah.');
+        return;
+      }
+
+      const select = el('pengajuanIdHibah');
+      select.innerHTML = '<option value="">Pilih data hibah</option>';
+
+      (hasil.data || []).forEach(x => {
+        const option = document.createElement('option');
+        option.value = x.idHibah;
+        option.textContent =
+          x.idHibah + ' - ' + x.namaLembaga;
+        select.appendChild(option);
+      });
+    },
+    error => status('statusPengajuanHibah',
+      'Gagal memuat pilihan hibah: ' + error)
+  );
+}
+
+function simpanPengajuanHibahDashboardPTLK() {
+  const data = {
+    idHibah: el('pengajuanIdHibah').value,
+    nomorProposal: el('pengajuanNomorProposal').value,
+    nilaiDiajukan: el('pengajuanNilai').value,
+    tautanProposal: el('pengajuanTautan').value,
+    uraianPermohonan: el('pengajuanUraian').value,
+    catatan: el('pengajuanCatatan').value
+  };
+
+  status('statusPengajuanHibah',
+    'Sedang menyimpan pengajuan hibah...');
+
+  callServer(
+    'simpanPengajuanHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusPengajuanHibah',
+          hasil && hasil.pesan || 'Pengajuan gagal disimpan.');
+        return;
+      }
+
+      status('statusPengajuanHibah', hasil.pesan);
+
+      el('pengajuanNomorProposal').value = '';
+      el('pengajuanNilai').value = '';
+      el('pengajuanTautan').value = '';
+      el('pengajuanUraian').value = '';
+      el('pengajuanCatatan').value = '';
+
+      muatPengajuanHibahDashboardPTLK();
+    },
+    error => status('statusPengajuanHibah',
+      'Gagal menyimpan pengajuan: ' + error)
+  );
+}
+
+function muatPengajuanHibahDashboardPTLK() {
+  status('statusPengajuanHibah',
+    'Sedang membaca daftar pengajuan...');
+
+  callServer(
+    'ambilPengajuanHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusPengajuanHibah',
+          hasil && hasil.pesan || 'Gagal membaca pengajuan.');
+        return;
+      }
+
+      const tbody = el('daftarPengajuanHibah');
+      const select = el('verifikasiIdPengajuan');
+
+      tbody.innerHTML = '';
+      select.innerHTML =
+        '<option value="">Pilih pengajuan hibah</option>';
+
+      if (!hasil.data || !hasil.data.length) {
+        const tr = tbody.insertRow();
+        const td = tr.insertCell();
+        td.colSpan = 7;
+        td.textContent = 'Belum ada pengajuan hibah.';
+      } else {
+        hasil.data.forEach((x, i) => {
+          const tr = tbody.insertRow();
+
+          [
+            i + 1,
+            x.idPengajuan,
+            x.idHibah,
+            x.tanggalPengajuan,
+            x.nomorProposal,
+            Number(x.nilaiDiajukan || 0).toLocaleString('id-ID'),
+            x.statusPengajuan
+          ].forEach(nilai => {
+            const td = tr.insertCell();
+            td.textContent = nilai == null ? '' : nilai;
+          });
+
+          const option = document.createElement('option');
+          option.value = x.idPengajuan;
+          option.textContent =
+            x.idPengajuan + ' - ' + x.statusPengajuan;
+
+          select.appendChild(option);
+        });
+      }
+
+      status('statusPengajuanHibah',
+        'Daftar pengajuan berhasil dimuat. Jumlah: ' + hasil.jumlah);
+    },
+    error => status('statusPengajuanHibah',
+      'Gagal membaca pengajuan: ' + error)
+  );
+}
+
+function simpanVerifikasiHibahDashboardPTLK() {
+  const data = {
+    idPengajuan: el('verifikasiIdPengajuan').value,
+    hasilVerifikasi: el('verifikasiHasil').value,
+    kelengkapanAdministrasi: el('verifikasiKelengkapan').value,
+    tautanDokumen: el('verifikasiTautan').value,
+    catatanVerifikasi: el('verifikasiCatatan').value
+  };
+
+  status('statusVerifikasiHibah',
+    'Sedang menyimpan hasil verifikasi...');
+
+  callServer(
+    'simpanVerifikasiHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusVerifikasiHibah',
+          hasil && hasil.pesan || 'Verifikasi gagal disimpan.');
+        return;
+      }
+
+      status('statusVerifikasiHibah', hasil.pesan);
+
+      el('verifikasiHasil').value = '';
+      el('verifikasiKelengkapan').value = '';
+      el('verifikasiTautan').value = '';
+      el('verifikasiCatatan').value = '';
+
+      muatPengajuanHibahDashboardPTLK();
+    },
+    error => status('statusVerifikasiHibah',
+      'Gagal menyimpan verifikasi: ' + error)
+  );
+}
+
+
+function simpanPenyaluranHibahDashboardPTLK() {
+  const data = {
+    idHibah: el('penyaluranIdHibah').value,
+    jenisHibah: el('penyaluranJenis').value,
+    tanggalPenyaluran: el('penyaluranTanggal').value,
+    nilaiPenyaluran: el('penyaluranNilai').value,
+    namaBarangJasa: el('penyaluranNamaBarangJasa').value,
+    volume: el('penyaluranVolume').value,
+    satuan: el('penyaluranSatuan').value,
+    nomorNphd: el('penyaluranNphd').value,
+    nomorBast: el('penyaluranBast').value,
+    tautanBast: el('penyaluranTautanBast').value,
+    keterangan: el('penyaluranKeterangan').value
+  };
+
+  status('statusPenyaluranHibah',
+    'Sedang menyimpan penyaluran hibah...');
+
+  callServer(
+    'simpanPenyaluranHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusPenyaluranHibah',
+          hasil && hasil.pesan || 'Penyaluran gagal disimpan.');
+        return;
+      }
+
+      status('statusPenyaluranHibah', hasil.pesan);
+
+      [
+        'penyaluranJenis',
+        'penyaluranTanggal',
+        'penyaluranNilai',
+        'penyaluranNamaBarangJasa',
+        'penyaluranVolume',
+        'penyaluranSatuan',
+        'penyaluranNphd',
+        'penyaluranBast',
+        'penyaluranTautanBast',
+        'penyaluranKeterangan'
+      ].forEach(id => el(id).value = '');
+
+      muatPenyaluranHibahDashboardPTLK();
+    },
+    error => status('statusPenyaluranHibah',
+      'Gagal menyimpan penyaluran: ' + error)
+  );
+}
+
+function muatPenyaluranHibahDashboardPTLK() {
+  status('statusPenyaluranHibah',
+    'Sedang membaca data penyaluran...');
+
+  callServer(
+    'ambilPenyaluranHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status('statusPenyaluranHibah',
+          hasil && hasil.pesan || 'Gagal membaca data penyaluran.');
+        return;
+      }
+
+      const tbody = el('daftarPenyaluranHibah');
+      tbody.innerHTML = '';
+
+      if (!hasil.data || !hasil.data.length) {
+        const tr = tbody.insertRow();
+        const td = tr.insertCell();
+        td.colSpan = 9;
+        td.textContent = 'Belum ada data penyaluran hibah.';
+      } else {
+        hasil.data.forEach((x, i) => {
+          const tr = tbody.insertRow();
+
+          [
+            i + 1,
+            x.idPenyaluran,
+            x.idHibah,
+            x.jenisHibah,
+            x.tanggalPenyaluran,
+            Number(x.nilaiPenyaluran || 0).toLocaleString('id-ID'),
+            x.nomorNphd,
+            x.nomorBast,
+            x.statusPenyaluran
+          ].forEach(nilai => {
+            const td = tr.insertCell();
+            td.textContent = nilai == null ? '' : nilai;
+          });
+        });
+      }
+
+      status('statusPenyaluranHibah',
+        'Data penyaluran berhasil dimuat. Jumlah: ' + hasil.jumlah);
+    },
+    error => status('statusPenyaluranHibah',
+      'Gagal membaca penyaluran: ' + error)
+  );
+}
+
+function PTLK_HIBAH_MUAT_PILIHAN_PENYALURAN() {
+  callServer(
+    'ambilMasterHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) return;
+
+      const select = el('penyaluranIdHibah');
+      select.innerHTML =
+        '<option value="">Pilih data hibah</option>';
+
+      (hasil.data || []).forEach(x => {
+        const option = document.createElement('option');
+        option.value = x.idHibah;
+        option.textContent =
+          x.idHibah + ' - ' + x.namaLembaga;
+        select.appendChild(option);
+      });
+    },
+    error => status('statusPenyaluranHibah',
+      'Gagal memuat pilihan hibah: ' + error)
+  );
+}
+
+function aturPanelPenetapanHibahPTLK() {
+  const panel = el('panelPenetapanHibah');
+  if (!panel) return;
+
+  if (!PTLK_HIBAH_AKSES()) {
+    panel.classList.add('hidden');
+    return;
+  }
+
+  panel.classList.add('hidden');
+}
+
+function bukaPanelHibahPTLK(idPanel) {
+  if (!PTLK_HIBAH_AKSES()) {
+    alert('Anda tidak memiliki akses Manajemen Hibah.');
+    return;
+  }
+
+  const daftarPanelHibah = [
+    'panelManajemenHibah',
+    'panelPengajuanHibah',
+    'panelPenyaluranHibah',
+    'panelPenetapanHibah',
+    'panelLPJHibah',
+    'panelMonevHibah'
+  ];
+
+  if (daftarPanelHibah.indexOf(idPanel) === -1) {
+    alert('Panel hibah tidak dikenal.');
+    return;
+  }
+
+  daftarPanelHibah.forEach(function(id) {
+    const panel = el(id);
+    if (panel) panel.classList.add('hidden');
+  });
+
+  const tujuan = el(idPanel);
+
+  if (!tujuan) {
+    alert('Panel ' + idPanel + ' tidak ditemukan.');
+    return;
+  }
+
+  tujuan.classList.remove('hidden');
+
+  if (idPanel === 'panelManajemenHibah') {
+    muatDataHibahDashboardPTLK();
+
+  } else if (idPanel === 'panelPengajuanHibah') {
+    muatPengajuanHibahDashboardPTLK();
+
+  } else if (idPanel === 'panelPenyaluranHibah') {
+    muatPenyaluranHibahDashboardPTLK();
+
+  } else if (idPanel === 'panelPenetapanHibah') {
+    PTLK_HIBAH_MUAT_PILIHAN_PENETAPAN();
+    muatPenetapanHibahDashboardPTLK();
+
+  } else if (idPanel === 'panelLPJHibah') {
+    PTLK_LPJ_MUAT_PILIHAN();
+    muatLPJHibahDashboardPTLK();
+
+  } else if (idPanel === 'panelMonevHibah') {
+    PTLK_MONEV_MUAT_PILIHAN();
+    muatMonevHibahDashboardPTLK();
+  }
+}
+
+function PTLK_LPJ_ESCAPE_(nilai) {
+  return String(nilai == null ? '' : nilai)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// MEMUAT PILIHAN MASTER HIBAH
+
+function PTLK_LPJ_MUAT_PILIHAN() {
+  callServer(
+    'ambilMasterHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusLPJHibah',
+          hasil && hasil.pesan || 'Gagal membaca data hibah.'
+        );
+        return;
+      }
+
+      const select = el('lpjIdHibah');
+      select.innerHTML =
+        '<option value="">Pilih data hibah</option>';
+
+      (hasil.data || []).forEach(x => {
+        const option = document.createElement('option');
+        option.value = x.idHibah;
+        option.textContent =
+          x.idHibah + ' - ' + x.namaLembaga;
+        select.appendChild(option);
+      });
+    },
+    error => status(
+      'statusLPJHibah',
+      'Gagal memuat pilihan hibah: ' + error
+    )
+  );
+}
+
+// MENYIMPAN PENGIRIMAN LPJ
+function simpanLPJHibahDashboardPTLK() {
+  const data = {
+    idHibah: el('lpjIdHibah').value,
+    tanggalPenyerahan: el('lpjTanggal').value,
+    nomorLPJ: el('lpjNomor').value,
+    nilaiPertanggungjawaban: el('lpjNilai').value,
+    tautanLPJ: el('lpjTautan').value,
+    keterangan: el('lpjKeterangan').value
+  };
+
+  if (!data.idHibah || !data.nomorLPJ ||
+      !data.nilaiPertanggungjawaban || !data.tautanLPJ) {
+    status(
+      'statusLPJHibah',
+      'Lengkapi ID Hibah, nomor LPJ, nilai pertanggungjawaban, dan tautan dokumen.'
+    );
+    return;
+  }
+
+  status('statusLPJHibah', 'Sedang mengirim LPJ...');
+
+  callServer(
+    'simpanLPJHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusLPJHibah',
+          hasil && hasil.pesan || 'LPJ gagal disimpan.'
+        );
+        return;
+      }
+
+      status('statusLPJHibah', hasil.pesan);
+
+      [
+        'lpjTanggal',
+        'lpjNomor',
+        'lpjNilai',
+        'lpjTautan',
+        'lpjKeterangan'
+      ].forEach(id => el(id).value = '');
+
+      muatLPJHibahDashboardPTLK();
+    },
+    error => status(
+      'statusLPJHibah',
+      'Gagal mengirim LPJ: ' + error
+    )
+  );
+}
+
+
+// MEMUAT DAFTAR LPJ
+function muatLPJHibahDashboardPTLK() {
+  status('statusLPJHibah', 'Sedang memuat daftar LPJ...');
+
+  callServer(
+    'ambilLPJHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || hasil.ok === false) {
+        status(
+          'statusLPJHibah',
+          hasil && hasil.pesan || 'Gagal memuat daftar LPJ.'
+        );
+        return;
+      }
+
+      const daftar = Array.isArray(hasil)
+        ? hasil
+        : (Array.isArray(hasil.data) ? hasil.data : []);
+
+      const tbody = el('daftarLPJHibah');
+
+      if (!daftar.length) {
+        tbody.innerHTML =
+          '<tr><td colspan="7">Belum ada data LPJ.</td></tr>';
+        el('verifikasiLPJId').innerHTML =
+          '<option value="">Belum ada LPJ</option>';
+        status('statusLPJHibah', 'Belum ada data LPJ.');
+        return;
+      }
+     
+      tbody.innerHTML = daftar.map((item, index) => {
+        const tautan = item.tautanLPJ || item.TAUTAN_LPJ || '';
+        const statusLPJ = item.statusLPJ || item.STATUS_LPJ || '';
+
+        return '<tr>' +
+          '<td>' + (index + 1) + '</td>' +
+          '<td>' + PTLK_LPJ_ESCAPE_(
+            item.idHibah || item.ID_HIBAH
+          ) + '</td>' +
+          '<td>' + PTLK_LPJ_ESCAPE_(
+            item.nomorLPJ || item.NOMOR_LPJ
+          ) + '</td>' +
+          '<td>' + PTLK_LPJ_ESCAPE_(
+            item.tanggalPenyerahan || item.TANGGAL_PENYERAHAN
+          ) + '</td>' +
+          '<td>Rp' + Number(
+            item.nilaiPertanggungjawaban ||
+            item.NILAI_PERTANGGUNGJAWABAN || 0
+          ).toLocaleString('id-ID') + '</td>' +
+          '<td>' + PTLK_LPJ_ESCAPE_(statusLPJ) + '</td>' +
+          '<td>' + (tautan
+            ? '<a href="' + PTLK_LPJ_ESCAPE_(tautan) +
+              '" target="_blank" rel="noopener">Buka LPJ</a>'
+            : '-') + '</td>' +
+          '</tr>';
+      }).join('');
+
+      const pilihan = '<option value="">Pilih LPJ</option>' +
+        daftar.map(item => {
+          const id = item.idLPJ || item.ID_LPJ || '';
+          const nomor = item.nomorLPJ || item.NOMOR_LPJ || '';
+          const statusLPJ = item.statusLPJ || item.STATUS_LPJ || '';
+
+          if (!id) return '';
+
+          return '<option value="' +
+            PTLK_LPJ_ESCAPE_(id) + '">' +
+            PTLK_LPJ_ESCAPE_(
+              nomor + ' - ' + statusLPJ
+            ) + '</option>';
+        }).join('');
+
+      el('verifikasiLPJId').innerHTML = pilihan;
+
+      status(
+        'statusLPJHibah',
+        'Daftar LPJ berhasil dimuat: ' + daftar.length + ' data.'
+      );
+    },
+    error => status(
+      'statusLPJHibah',
+      'Gagal memuat daftar LPJ: ' + error
+    )
+  );
+}
+
+
+// MENYIMPAN HASIL PEMERIKSAAN LPJ
+function verifikasiLPJHibahDashboardPTLK() {
+  const data = {
+    idLPJ: el('verifikasiLPJId').value,
+    statusLPJ: el('verifikasiLPJStatus').value,
+    catatanVerifikasi: el('verifikasiLPJCatatan').value
+  };
+
+  if (!data.idLPJ || !data.statusLPJ) {
+    status(
+      'statusVerifikasiLPJHibah',
+      'Pilih LPJ dan hasil pemeriksaan terlebih dahulu.'
+    );
+    return;
+  }
+
+  if (!data.catatanVerifikasi.trim()) {
+    status(
+      'statusVerifikasiLPJHibah',
+      'Catatan pemeriksaan wajib diisi.'
+    );
+    return;
+  }
+
+  status(
+    'statusVerifikasiLPJHibah',
+    'Sedang menyimpan hasil pemeriksaan...'
+  );
+
+  callServer(
+    'verifikasiLPJHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusVerifikasiLPJHibah',
+          hasil && hasil.pesan ||
+          'Hasil pemeriksaan gagal disimpan.'
+        );
+        return;
+      }
+
+      status(
+        'statusVerifikasiLPJHibah',
+        hasil.pesan
+      );
+
+      el('verifikasiLPJId').value = '';
+      el('verifikasiLPJStatus').value = '';
+      el('verifikasiLPJCatatan').value = '';
+
+      muatLPJHibahDashboardPTLK();
+    },
+    error => status(
+      'statusVerifikasiLPJHibah',
+      'Gagal menyimpan pemeriksaan: ' + error
+    )
+  );
+}
+
+// ======================================================
+// MONITORING DAN EVALUASI HIBAH PTLK
+// ======================================================
+
+// 1. MENYIMPAN HASIL MONITORING DAN EVALUASI HIBAH
+function simpanMonevHibahPTLK(idToken, data) {
+  const pengguna = PTLK_PERIKSA_HAK_HIBAH_();
+  const lock = LockService.getScriptLock();
+
+  try {
+    if (!data) {
+      throw new Error('Data monitoring tidak ditemukan.');
+    }
+
+    const idHibah = String(data.idHibah || '').trim();
+    const tanggal = String(data.tanggalMonev || '').trim();
+    const lokasi = String(data.lokasiMonev || '').trim();
+    const petugas = String(data.namaPetugas || '').trim();
+    const kesesuaian = String(
+      data.kesesuaianPenggunaan || ''
+    ).trim();
+
+    const hasil = String(data.hasilMonev || '').trim();
+    const manfaat = String(data.manfaatHibah || '').trim();
+    const kendala = String(data.kendala || '').trim();
+    const rekomendasi = String(data.rekomendasi || '').trim();
+    const statusTindakLanjut = String(
+      data.statusTindakLanjut || ''
+    ).trim();
+
+    if (!idHibah || !tanggal || !lokasi || !petugas) {
+      throw new Error(
+        'Penerima hibah, tanggal, lokasi, dan nama petugas wajib diisi.'
+      );
+    }
+
+    if (!kesesuaian || !hasil || !manfaat) {
+      throw new Error(
+        'Kesesuaian penggunaan, hasil monitoring, dan manfaat hibah wajib diisi.'
+      );
+    }
+
+    if (!statusTindakLanjut) {
+      throw new Error('Status tindak lanjut wajib dipilih.');
+    }
+
+    if (!PTLK_HIBAH_ID_ADA_(idHibah)) {
+      throw new Error(
+        'ID Hibah tidak ditemukan dalam database Master Hibah.'
+      );
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
+      throw new Error('Format tanggal monitoring tidak valid.');
+    }
+
+    const tanggalObj = new Date(
+      Number(tanggal.substring(0, 4)),
+      Number(tanggal.substring(5, 7)) - 1,
+      Number(tanggal.substring(8, 10))
+    );
+
+    if (
+      tanggalObj.getFullYear() !== Number(tanggal.substring(0, 4)) ||
+      tanggalObj.getMonth() !== Number(tanggal.substring(5, 7)) - 1 ||
+      tanggalObj.getDate() !== Number(tanggal.substring(8, 10))
+    ) {
+      throw new Error('Tanggal monitoring tidak valid.');
+    }
+
+    if (
+      ['SESUAI', 'SEBAGIAN_SESUAI', 'TIDAK_SESUAI']
+        .indexOf(kesesuaian) === -1
+    ) {
+      throw new Error('Pilihan kesesuaian penggunaan tidak valid.');
+    }
+
+    if (
+      [
+        'BELUM_DITINDAKLANJUTI',
+        'DALAM_PROSES',
+        'SELESAI'
+      ].indexOf(statusTindakLanjut) === -1
+    ) {
+      throw new Error('Status tindak lanjut tidak valid.');
+    }
+
+    lock.waitLock(30000);
+
+    const ss = ambilSpreadsheetPTLK_();
+    const sheet = ss.getSheetByName('MONEV_HIBAH_PTLK');
+
+    if (!sheet) {
+      throw new Error('Sheet MONEV_HIBAH_PTLK tidak ditemukan.');
+    }
+
+    const jumlahKolom = sheet.getLastColumn();
+
+    if (jumlahKolom < 1) {
+      throw new Error('Header database Monev Hibah belum tersedia.');
+    }
+
+    const header = sheet
+      .getRange(1, 1, 1, jumlahKolom)
+      .getDisplayValues()[0]
+      .map(function(x) {
+        return String(x).trim().toUpperCase();
+      });
+
+    const kolomWajib = [
+      'ID_MONEV',
+      'ID_HIBAH',
+      'TANGGAL_MONEV',
+      'LOKASI_MONEV',
+      'NAMA_PETUGAS',
+      'KESESUAIAN_PENGGUNAAN',
+      'HASIL_MONEV',
+      'MANFAAT_HIBAH',
+      'KENDALA',
+      'REKOMENDASI',
+      'STATUS_TINDAK_LANJUT'
+    ];
+
+    kolomWajib.forEach(function(namaKolom) {
+      if (header.indexOf(namaKolom) === -1) {
+        throw new Error(
+          'Kolom database tidak ditemukan: ' + namaKolom
+        );
+      }
+    });
+
+    const nilai = {
+      ID_MONEV: PTLK_ID_BARU_('MNV'),
+      ID_HIBAH: idHibah,
+      TANGGAL_MONEV: tanggalObj,
+      LOKASI_MONEV: lokasi,
+      NAMA_PETUGAS: petugas,
+      KESESUAIAN_PENGGUNAAN: kesesuaian,
+      HASIL_MONEV: hasil,
+      MANFAAT_HIBAH: manfaat,
+      KENDALA: kendala,
+      REKOMENDASI: rekomendasi,
+      STATUS_TINDAK_LANJUT: statusTindakLanjut
+    };
+
+    const baris = header.map(function(namaKolom) {
+      return Object.prototype.hasOwnProperty.call(
+        nilai,
+        namaKolom
+      ) ? nilai[namaKolom] : '';
+    });
+
+    sheet.appendRow(baris);
+
+    return {
+      ok: true,
+      idMonev: nilai.ID_MONEV,
+      pesan: 'Hasil Monitoring dan Evaluasi Hibah berhasil disimpan.'
+    };
+
+  } catch (error) {
+    return {
+      ok: false,
+      pesan: error.message || String(error)
+    };
+
+  } finally {
+    if (lock.hasLock()) {
+      lock.releaseLock();
+    }
+  }
+}
+
+
+// 2. MEMBACA DAFTAR MONITORING DAN EVALUASI HIBAH
+function ambilMonevHibahPTLK(idToken, filter) {
+  try {
+    PTLK_PERIKSA_HAK_HIBAH_(idToken);
+
+    filter = filter || {};
+
+    const ss = ambilSpreadsheetPTLK_();
+    const sheet = ss.getSheetByName('MONEV_HIBAH_PTLK');
+
+    if (!sheet) {
+      throw new Error('Sheet MONEV_HIBAH_PTLK tidak ditemukan.');
+    }
+
+    const data = sheet.getDataRange().getValues();
+
+    if (data.length < 2) {
+      return {
+        ok: true,
+        data: [],
+        jumlah: 0,
+        pesan: 'Belum ada data Monitoring dan Evaluasi Hibah.'
+      };
+    }
+
+    const header = data[0].map(function(x) {
+      return String(x).trim().toUpperCase();
+    });
+
+    const kolom = {};
+    header.forEach(function(nama, index) {
+      kolom[nama] = index;
+    });
+
+    const wajib = [
+      'ID_MONEV',
+      'ID_HIBAH',
+      'TANGGAL_MONEV',
+      'LOKASI_MONEV',
+      'NAMA_PETUGAS',
+      'KESESUAIAN_PENGGUNAAN',
+      'HASIL_MONEV',
+      'MANFAAT_HIBAH',
+      'KENDALA',
+      'REKOMENDASI',
+      'STATUS_TINDAK_LANJUT'
+    ];
+
+    wajib.forEach(function(nama) {
+      if (kolom[nama] === undefined) {
+        throw new Error(
+          'Kolom database tidak ditemukan: ' + nama
+        );
+      }
+    });
+
+    const zona = Session.getScriptTimeZone();
+
+    const daftar = data.slice(1)
+      .filter(function(baris) {
+        return String(baris[kolom.ID_MONEV] || '').trim() !== '';
+      })
+      .map(function(baris) {
+        const tanggal = baris[kolom.TANGGAL_MONEV];
+
+        return {
+          idMonev: String(baris[kolom.ID_MONEV] || ''),
+          idHibah: String(baris[kolom.ID_HIBAH] || ''),
+          tanggalMonev: tanggal instanceof Date
+            ? Utilities.formatDate(tanggal, zona, 'yyyy-MM-dd')
+            : String(tanggal || ''),
+          lokasiMonev: String(baris[kolom.LOKASI_MONEV] || ''),
+          namaPetugas: String(baris[kolom.NAMA_PETUGAS] || ''),
+          kesesuaianPenggunaan: String(
+            baris[kolom.KESESUAIAN_PENGGUNAAN] || ''
+          ),
+          hasilMonev: String(baris[kolom.HASIL_MONEV] || ''),
+          manfaatHibah: String(baris[kolom.MANFAAT_HIBAH] || ''),
+          kendala: String(baris[kolom.KENDALA] || ''),
+          rekomendasi: String(baris[kolom.REKOMENDASI] || ''),
+          statusTindakLanjut: String(
+            baris[kolom.STATUS_TINDAK_LANJUT] || ''
+          )
+        };
+      });
+
+    const hasil = daftar.filter(function(item) {
+      if (
+        filter.idHibah &&
+        item.idHibah !== String(filter.idHibah)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    hasil.reverse();
+
+    return {
+      ok: true,
+      data: hasil,
+      jumlah: hasil.length,
+      pesan: 'Data Monitoring dan Evaluasi Hibah berhasil dibaca.'
+    };
+
+  } catch (error) {
+    return {
+      ok: false,
+      data: [],
+      jumlah: 0,
+      pesan: error.message || String(error)
+    };
+  }
+}
+
+
+// ======================================================
+// JAVASCRIPT MONITORING DAN EVALUASI HIBAH PTLK
+// ======================================================
+
+// 1. MEMUAT PILIHAN PENERIMA HIBAH
+function PTLK_MONEV_MUAT_PILIHAN() {
+  callServer(
+    'ambilMasterHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusMonevHibah',
+          hasil && hasil.pesan || 'Gagal memuat penerima hibah.'
+        );
+        return;
+      }
+
+      const select = el('monevIdHibah');
+
+      select.innerHTML =
+        '<option value="">Pilih penerima hibah</option>';
+
+      (hasil.data || []).forEach(x => {
+        const option = document.createElement('option');
+        option.value = x.idHibah;
+        option.textContent =
+          x.idHibah + ' - ' + x.namaLembaga;
+        select.appendChild(option);
+      });
+    },
+    error => status(
+      'statusMonevHibah',
+      'Gagal memuat penerima hibah: ' + error
+    )
+  );
+}
+
+
+// 2. MENYIMPAN HASIL MONEV HIBAH
+function simpanMonevHibahDashboardPTLK() {
+  const data = {
+    idHibah: el('monevIdHibah').value,
+    tanggalMonev: el('monevTanggal').value,
+    lokasiMonev: el('monevLokasi').value,
+    namaPetugas: el('monevPetugas').value,
+    kesesuaianPenggunaan: el('monevKesesuaian').value,
+    hasilMonev: el('monevHasil').value,
+    manfaatHibah: el('monevManfaat').value,
+    kendala: el('monevKendala').value,
+    rekomendasi: el('monevRekomendasi').value,
+    statusTindakLanjut: el('monevStatusTindakLanjut').value
+  };
+
+  if (
+    !data.idHibah ||
+    !data.tanggalMonev ||
+    !data.lokasiMonev ||
+    !data.namaPetugas ||
+    !data.kesesuaianPenggunaan ||
+    !data.hasilMonev ||
+    !data.manfaatHibah ||
+    !data.statusTindakLanjut
+  ) {
+    status(
+      'statusMonevHibah',
+      'Mohon lengkapi seluruh kolom wajib Monev.'
+    );
+    return;
+  }
+
+  status('statusMonevHibah', 'Sedang menyimpan hasil Monev...');
+
+  callServer(
+    'simpanMonevHibahPTLK',
+    [TOKEN_LOGIN, data],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusMonevHibah',
+          hasil && hasil.pesan || 'Gagal menyimpan hasil Monev.'
+        );
+        return;
+      }
+
+      status('statusMonevHibah', hasil.pesan);
+
+      el('monevTanggal').value = '';
+      el('monevLokasi').value = '';
+      el('monevPetugas').value = '';
+      el('monevKesesuaian').value = '';
+      el('monevHasil').value = '';
+      el('monevManfaat').value = '';
+      el('monevKendala').value = '';
+      el('monevRekomendasi').value = '';
+      el('monevStatusTindakLanjut').value = '';
+
+      muatMonevHibahDashboardPTLK();
+    },
+    error => status(
+      'statusMonevHibah',
+      'Gagal menyimpan Monev: ' + error
+    )
+  );
+}
+
+
+// 3. MEMUAT DAFTAR MONEV HIBAH
+function muatMonevHibahDashboardPTLK() {
+  status('statusMonevHibah', 'Sedang membaca data Monev...');
+
+  callServer(
+    'ambilMonevHibahPTLK',
+    [TOKEN_LOGIN, {}],
+    hasil => {
+      if (!hasil || !hasil.ok) {
+        status(
+          'statusMonevHibah',
+          hasil && hasil.pesan || 'Gagal membaca data Monev.'
+        );
+        return;
+      }
+
+      const tbody = el('daftarMonevHibah');
+      const daftar = hasil.data || [];
+
+      if (!daftar.length) {
+        tbody.innerHTML =
+          '<tr><td colspan="11">Belum ada data Monev Hibah.</td></tr>';
+
+        status('statusMonevHibah', 'Belum ada data Monev Hibah.');
+        return;
+      }
+
+      tbody.innerHTML = daftar.map((x, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.idHibah)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.tanggalMonev)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.lokasiMonev)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.namaPetugas)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.kesesuaianPenggunaan)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.hasilMonev)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.manfaatHibah)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.kendala)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.rekomendasi)}</td>
+          <td>${PTLK_LPJ_ESCAPE_(x.statusTindakLanjut)}</td>
+        </tr>
+      `).join('');
+
+      status(
+        'statusMonevHibah',
+        'Berhasil membaca ' + daftar.length + ' data Monev Hibah.'
+      );
+    },
+    error => status(
+      'statusMonevHibah',
+      'Gagal membaca data Monev: ' + error
+    )
+  );
+}
+
+/* =====================================================
+   PENGHUBUNG DAFTAR KEGIATAN DISETUJUI KE MODUL MONEV
+   ===================================================== */
+
+let DATA_KEGIATAN_MONEV_PTLK = [];
+
+function PTLK_MONEV_ESCAPE_HTML_(nilai) {
+  return String(nilai == null ? '' : nilai)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+
+
+function muatPilihanKegiatanPelaksanaanPTLK() {
+  const select = el('pelaksanaanIdKegiatan');
+
+  if (!select) {
+    console.error('Elemen pelaksanaanIdKegiatan tidak ditemukan.');
+    return;
+  }
+
+  if (!TOKEN_LOGIN) {
+    select.innerHTML =
+      '<option value="">Token login belum tersedia</option>';
+    return;
+  }
+
+  select.innerHTML =
+    '<option value="">Memuat daftar kegiatan...</option>';
+
+  callServer(
+    'ambilDaftarKegiatanDisetujuiPTLK',
+    [TOKEN_LOGIN, {}],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        select.innerHTML =
+          '<option value="">Gagal memuat kegiatan</option>';
+
+        console.error(
+          'Gagal memuat kegiatan Pelaksanaan:',
+          hasil
+        );
+        return;
+      }
+
+      select.innerHTML =
+        '<option value="">-- Pilih Kegiatan --</option>';
+
+      const daftar = hasil.data || [];
+
+      daftar.forEach(function(item) {
+        const option = document.createElement('option');
+
+        option.value = item.idKegiatan;
+        option.textContent =
+          item.tahun + ' | ' +
+          item.namaKegiatan + ' | ' +
+          item.kabupatenKota;
+
+        select.appendChild(option);
+      });
+
+      if (daftar.length === 0) {
+        select.innerHTML =
+          '<option value="">Belum ada kegiatan disetujui</option>';
+      }
+
+      console.log(
+        'Jumlah kegiatan Pelaksanaan:',
+        daftar.length
+      );
+    },
+
+    function(error) {
+      select.innerHTML =
+        '<option value="">Gagal memuat kegiatan</option>';
+
+      console.error(
+        'Kesalahan pemuatan kegiatan Pelaksanaan:',
+        error
+      );
+    }
+  );
+}
+
+
+function PTLK_MONEV_ID_KEGIATAN_TERPILIH_() {
+  const select = el('monevKegiatanId');
+
+  return select ? select.value : '';
+}
+
+
+function bukaSubPanelMonevPTLK(nama) {
+  const daftar = [
+    'monitoring',
+    'tindakLanjut',
+    'evaluasi',
+    'dokumentasi'
+  ];
+
+  const idPanel = {
+    monitoring: 'subMonevMonitoring',
+    tindakLanjut: 'subMonevTindakLanjut',
+    evaluasi: 'subMonevEvaluasi',
+    dokumentasi: 'subMonevDokumentasi'
+  };
+
+  daftar.forEach(function(item) {
+    const panel = el(idPanel[item]);
+
+    if (panel) {
+      panel.classList.toggle('hidden', item !== nama);
+    }
+  });
+
+  if (!PTLK_MONEV_ID_KEGIATAN_TERPILIH_()) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  if (nama === 'monitoring') {
+    muatMonitoringKegiatanDashboardPTLK();
+  }
+
+  if (nama === 'tindakLanjut') {
+    muatPilihanMonitoringTindakLanjutPTLK();
+    muatTindakLanjutDashboardPTLK();
+  }
+
+  if (nama === 'evaluasi') {
+    muatEvaluasiKegiatanDashboardPTLK();
+  }
+
+  if (nama === 'dokumentasi') {
+    muatDokumentasiKegiatanDashboardPTLK();
+  }
+}
+
+/* =========================================================
+   MODUL SIMPAN DAN TAMPILKAN MONEV KEGIATAN PTLK
+   ========================================================= */
+
+function PTLK_MONEV_STATUS_(id, pesan) {
+  const area = el(id);
+  if (area) area.textContent = pesan;
+}
+
+
+function PTLK_MONEV_TABEL_(id, kolom, data) {
+  const area = el(id);
+  if (!area) return;
+
+  if (!data || !data.length) {
+    area.innerHTML = '<p>Belum ada data.</p>';
+    return;
+  }
+
+  let html = '<div style="overflow-x:auto"><table class="table">';
+  html += '<thead><tr>';
+
+  kolom.forEach(function(k) {
+    html += '<th>' + PTLK_MONEV_ESCAPE_HTML_(k.label) + '</th>';
+  });
+
+  html += '</tr></thead><tbody>';
+
+  data.forEach(function(item) {
+    html += '<tr>';
+
+    kolom.forEach(function(k) {
+      html += '<td>' +
+        PTLK_MONEV_ESCAPE_HTML_(item[k.field]) +
+        '</td>';
+    });
+
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  area.innerHTML = html;
+}
+
+
+/* =========================================================
+   A. MONITORING KEGIATAN
+   ========================================================= */
+
+function simpanMonitoringKegiatanDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  const data = {
+    ID_KEGIATAN: idKegiatan,
+    TANGGAL_MONITORING: el('monTanggal').value,
+    PETUGAS_MONITORING: el('monPetugas').value.trim(),
+    KEMAJUAN_PELAKSANAAN: el('monKemajuan').value.trim(),
+    HASIL_SEMENTARA: el('monHasil').value.trim(),
+    KENDALA: el('monKendala').value.trim(),
+    REKOMENDASI: el('monRekomendasi').value.trim(),
+    PIC_TINDAK_LANJUT: el('monPIC').value.trim(),
+    BATAS_WAKTU: el('monBatas').value,
+    STATUS_TINDAK_LANJUT: el('monStatus').value,
+    LINK_BUKTI: el('monBukti').value.trim()
+  };
+
+  if (
+    !data.TANGGAL_MONITORING ||
+    !data.PETUGAS_MONITORING ||
+    !data.KEMAJUAN_PELAKSANAAN
+  ) {
+    alert('Tanggal, petugas, dan kemajuan pelaksanaan wajib diisi.');
+    return;
+  }
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevMonitoring',
+    'Sedang menyimpan hasil monitoring...'
+  );
+
+  callServer(
+    'simpanMonitoringKegiatanPTLK',
+    [TOKEN_LOGIN, data],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevMonitoring',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal menyimpan monitoring.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevMonitoring',
+        hasil.pesan + ' ID: ' + hasil.id
+      );
+
+      el('monHasil').value = '';
+      el('monKendala').value = '';
+      el('monRekomendasi').value = '';
+      el('monPIC').value = '';
+      el('monBatas').value = '';
+      el('monBukti').value = '';
+
+      muatMonitoringKegiatanDashboardPTLK();
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevMonitoring',
+        'Gagal menyimpan: ' + error
+      );
+    }
+  );
+}
+
+
+function muatMonitoringKegiatanDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) return;
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevMonitoring',
+    'Sedang membaca data monitoring...'
+  );
+
+  callServer(
+    'ambilMonitoringKegiatanPTLK',
+    [TOKEN_LOGIN, { ID_KEGIATAN: idKegiatan }],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevMonitoring',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal membaca monitoring.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_TABEL_(
+        'daftarMonevMonitoring',
+        [
+          { field: 'ID_MONITORING', label: 'ID Monitoring' },
+          { field: 'TANGGAL_MONITORING', label: 'Tanggal' },
+          { field: 'PETUGAS_MONITORING', label: 'Petugas' },
+          { field: 'KEMAJUAN_PELAKSANAAN', label: 'Kemajuan' },
+          { field: 'KENDALA', label: 'Kendala' },
+          { field: 'REKOMENDASI', label: 'Rekomendasi' },
+          { field: 'STATUS_TINDAK_LANJUT', label: 'Status Tindak Lanjut' }
+        ],
+        hasil.data
+      );
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevMonitoring',
+        'Data monitoring ditemukan: ' + hasil.jumlah
+      );
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevMonitoring',
+        'Gagal membaca: ' + error
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   B. TINDAK LANJUT HASIL MONITORING
+   ========================================================= */
+
+function muatPilihanMonitoringTindakLanjutPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+  const select = el('tlIdMonitoring');
+
+  if (!select || !idKegiatan) return;
+
+  select.innerHTML =
+    '<option value="">Memuat hasil monitoring...</option>';
+
+  callServer(
+    'ambilMonitoringKegiatanPTLK',
+    [TOKEN_LOGIN, { ID_KEGIATAN: idKegiatan }],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        select.innerHTML =
+          '<option value="">Gagal memuat monitoring</option>';
+        return;
+      }
+
+      select.innerHTML =
+        '<option value="">-- Pilih Hasil Monitoring --</option>';
+
+      (hasil.data || []).forEach(function(item) {
+        const option = document.createElement('option');
+
+        option.value = item.ID_MONITORING;
+        option.textContent =
+          item.ID_MONITORING + ' | ' +
+          item.TANGGAL_MONITORING + ' | ' +
+          item.PETUGAS_MONITORING;
+
+        select.appendChild(option);
+      });
+    },
+
+    function(error) {
+      select.innerHTML =
+        '<option value="">Gagal memuat monitoring</option>';
+    }
+  );
+}
+
+
+function simpanTindakLanjutDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  const data = {
+    ID_MONITORING: el('tlIdMonitoring').value,
+    ID_KEGIATAN: idKegiatan,
+    URAIAN_REKOMENDASI: el('tlUraian').value.trim(),
+    RENCANA_TINDAKAN: el('tlRencana').value.trim(),
+    PIC: el('tlPIC').value.trim(),
+    TANGGAL_MULAI: el('tlTanggalMulai').value,
+    BATAS_WAKTU: el('tlBatas').value,
+    STATUS: el('tlStatus').value,
+    HASIL_TINDAK_LANJUT: el('tlHasil').value.trim(),
+    LINK_BUKTI: el('tlBukti').value.trim()
+  };
+
+  if (
+    !data.ID_MONITORING ||
+    !data.URAIAN_REKOMENDASI ||
+    !data.RENCANA_TINDAKAN ||
+    !data.PIC ||
+    !data.BATAS_WAKTU
+  ) {
+    alert('Lengkapi monitoring, rekomendasi, rencana tindakan, PIC, dan batas waktu.');
+    return;
+  }
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevTindakLanjut',
+    'Sedang menyimpan tindak lanjut...'
+  );
+
+  callServer(
+    'simpanTindakLanjutMonevPTLK',
+    [TOKEN_LOGIN, data],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevTindakLanjut',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal menyimpan tindak lanjut.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevTindakLanjut',
+        hasil.pesan + ' ID: ' + hasil.id
+      );
+
+      el('tlUraian').value = '';
+      el('tlRencana').value = '';
+      el('tlPIC').value = '';
+      el('tlTanggalMulai').value = '';
+      el('tlBatas').value = '';
+      el('tlHasil').value = '';
+      el('tlBukti').value = '';
+
+      muatTindakLanjutDashboardPTLK();
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevTindakLanjut',
+        'Gagal menyimpan: ' + error
+      );
+    }
+  );
+}
+
+
+function muatTindakLanjutDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) return;
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevTindakLanjut',
+    'Sedang membaca tindak lanjut...'
+  );
+
+  callServer(
+    'ambilTindakLanjutMonevPTLK',
+    [TOKEN_LOGIN, { ID_KEGIATAN: idKegiatan }],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevTindakLanjut',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal membaca tindak lanjut.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_TABEL_(
+        'daftarMonevTindakLanjut',
+        [
+          { field: 'ID_TINDAK_LANJUT', label: 'ID Tindak Lanjut' },
+          { field: 'ID_MONITORING', label: 'ID Monitoring' },
+          { field: 'URAIAN_REKOMENDASI', label: 'Rekomendasi' },
+          { field: 'RENCANA_TINDAKAN', label: 'Rencana Tindakan' },
+          { field: 'PIC', label: 'PIC' },
+          { field: 'BATAS_WAKTU', label: 'Batas Waktu' },
+          { field: 'STATUS', label: 'Status' },
+          { field: 'HASIL_TINDAK_LANJUT', label: 'Hasil' }
+        ],
+        hasil.data
+      );
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevTindakLanjut',
+        'Data tindak lanjut ditemukan: ' + hasil.jumlah
+      );
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevTindakLanjut',
+        'Gagal membaca: ' + error
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   C. EVALUASI KEGIATAN
+   ========================================================= */
+
+function simpanEvaluasiKegiatanDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  const data = {
+    ID_KEGIATAN: idKegiatan,
+    INDIKATOR: el('evIndikator').value.trim(),
+    SATUAN: el('evSatuan').value.trim(),
+    BASELINE: el('evBaseline').value,
+    TARGET: el('evTarget').value,
+    REALISASI: el('evRealisasi').value,
+    ANALISIS_CAPAIAN: el('evAnalisis').value.trim(),
+    HASIL_OUTCOME: el('evOutcome').value.trim(),
+    FAKTOR_PENDUKUNG: el('evPendukung').value.trim(),
+    FAKTOR_PENGHAMBAT: el('evPenghambat').value.trim(),
+    REKOMENDASI: el('evRekomendasi').value.trim(),
+    LINK_BUKTI: el('evBukti').value.trim(),
+    PETUGAS_EVALUASI: el('evPetugas').value.trim(),
+    TANGGAL_EVALUASI: el('evTanggal').value
+  };
+
+  if (
+    !data.INDIKATOR ||
+    !data.TARGET ||
+    !data.REALISASI ||
+    !data.PETUGAS_EVALUASI ||
+    !data.TANGGAL_EVALUASI
+  ) {
+    alert('Lengkapi indikator, target, realisasi, petugas, dan tanggal evaluasi.');
+    return;
+  }
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevEvaluasi',
+    'Sedang menyimpan evaluasi...'
+  );
+
+  callServer(
+    'simpanEvaluasiKegiatanPTLK',
+    [TOKEN_LOGIN, data],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevEvaluasi',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal menyimpan evaluasi.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevEvaluasi',
+        hasil.pesan + ' ID: ' + hasil.id
+      );
+
+      el('evIndikator').value = '';
+      el('evSatuan').value = '';
+      el('evBaseline').value = '';
+      el('evTarget').value = '';
+      el('evRealisasi').value = '';
+      el('evAnalisis').value = '';
+      el('evOutcome').value = '';
+      el('evPendukung').value = '';
+      el('evPenghambat').value = '';
+      el('evRekomendasi').value = '';
+      el('evBukti').value = '';
+
+      muatEvaluasiKegiatanDashboardPTLK();
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevEvaluasi',
+        'Gagal menyimpan: ' + error
+      );
+    }
+  );
+}
+
+
+function muatEvaluasiKegiatanDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) return;
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevEvaluasi',
+    'Sedang membaca evaluasi...'
+  );
+
+  callServer(
+    'ambilEvaluasiKegiatanPTLK',
+    [TOKEN_LOGIN, { ID_KEGIATAN: idKegiatan }],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevEvaluasi',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal membaca evaluasi.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_TABEL_(
+        'daftarMonevEvaluasi',
+        [
+          { field: 'ID_EVALUASI', label: 'ID Evaluasi' },
+          { field: 'INDIKATOR', label: 'Indikator' },
+          { field: 'TARGET', label: 'Target' },
+          { field: 'REALISASI', label: 'Realisasi' },
+          { field: 'PERSENTASE_CAPAIAN', label: 'Capaian (%)' },
+          { field: 'ANALISIS_CAPAIAN', label: 'Analisis' },
+          { field: 'HASIL_OUTCOME', label: 'Outcome' },
+          { field: 'REKOMENDASI', label: 'Rekomendasi' },
+          { field: 'TANGGAL_EVALUASI', label: 'Tanggal Evaluasi' }
+        ],
+        hasil.data
+      );
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevEvaluasi',
+        'Data evaluasi ditemukan: ' + hasil.jumlah
+      );
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevEvaluasi',
+        'Gagal membaca: ' + error
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   D. DOKUMENTASI KEGIATAN
+   ========================================================= */
+
+function simpanDokumentasiKegiatanDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  const data = {
+    ID_KEGIATAN: idKegiatan,
+    JENIS_DOKUMENTASI: el('docJenis').value,
+    URAIAN: el('docUraian').value.trim(),
+    LINK_BUKTI: el('docTautan').value.trim()
+  };
+
+  if (!data.JENIS_DOKUMENTASI || !data.LINK_BUKTI) {
+    alert('Jenis dokumentasi dan tautan file wajib diisi.');
+    return;
+  }
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevDokumentasi',
+    'Sedang menyimpan dokumentasi...'
+  );
+
+  callServer(
+    'simpanDokumentasiKegiatanPTLK',
+    [TOKEN_LOGIN, data],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevDokumentasi',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal menyimpan dokumentasi.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevDokumentasi',
+        hasil.pesan + ' ID: ' + hasil.id
+      );
+
+      el('docUraian').value = '';
+      el('docTautan').value = '';
+
+      muatDokumentasiKegiatanDashboardPTLK();
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevDokumentasi',
+        'Gagal menyimpan: ' + error
+      );
+    }
+  );
+}
+
+
+function muatDokumentasiKegiatanDashboardPTLK() {
+  const idKegiatan = PTLK_MONEV_ID_KEGIATAN_TERPILIH_();
+
+  if (!idKegiatan) return;
+
+  PTLK_MONEV_STATUS_(
+    'statusMonevDokumentasi',
+    'Sedang membaca dokumentasi...'
+  );
+
+  callServer(
+    'ambilDokumentasiKegiatanPTLK',
+    [TOKEN_LOGIN, { ID_KEGIATAN: idKegiatan }],
+
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        PTLK_MONEV_STATUS_(
+          'statusMonevDokumentasi',
+          hasil && hasil.pesan ? hasil.pesan : 'Gagal membaca dokumentasi.'
+        );
+        return;
+      }
+
+      PTLK_MONEV_TABEL_(
+        'daftarMonevDokumentasi',
+        [
+          { field: 'ID_DOKUMENTASI', label: 'ID Dokumentasi' },
+          { field: 'JENIS_DOKUMENTASI', label: 'Jenis' },
+          { field: 'URAIAN', label: 'Uraian' },
+          { field: 'LINK_BUKTI', label: 'Tautan File' },
+          { field: 'WAKTU_INPUT', label: 'Waktu Input' }
+        ],
+        hasil.data
+      );
+
+      PTLK_MONEV_STATUS_(
+        'statusMonevDokumentasi',
+        'Dokumentasi ditemukan: ' + hasil.jumlah
+      );
+    },
+
+    function(error) {
+      PTLK_MONEV_STATUS_(
+        'statusMonevDokumentasi',
+        'Gagal membaca: ' + error
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   E. PERUBAHAN KEGIATAN TERPILIH
+   ========================================================= */
+
+(function PTLK_MONEV_PANTAU_PILIHAN_() {
+  const select = el('monevKegiatanId');
+
+  if (!select || select.dataset.monevTerpasang === '1') return;
+
+  select.dataset.monevTerpasang = '1';
+
+  select.addEventListener('change', function() {
+    [
+      'subMonevMonitoring',
+      'subMonevTindakLanjut',
+      'subMonevEvaluasi',
+      'subMonevDokumentasi'
+    ].forEach(function(id) {
+      const panel = el(id);
+      if (panel) panel.classList.add('hidden');
+    });
+
+    [
+      'daftarMonevMonitoring',
+      'daftarMonevTindakLanjut',
+      'daftarMonevEvaluasi',
+      'daftarMonevDokumentasi'
+    ].forEach(function(id) {
+      const area = el(id);
+      if (area) area.innerHTML = '';
+    });
+  });
+})();
+
+
+/* =====================================================
+   PELAKSANAAN DAN REALISASI KEGIATAN PTLK
+   ===================================================== */
+
+function muatPilihanKegiatanPelaksanaanPTLK() {
+  const select = el('pelaksanaanIdKegiatan');
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Memuat kegiatan...</option>';
+
+  callServer(
+    'ambilDaftarKegiatanDisetujuiPTLK',
+    [TOKEN_LOGIN, {}],
+    function(hasil) {
+      if (!hasil || !hasil.ok) {
+        select.innerHTML =
+          '<option value="">Gagal memuat kegiatan</option>';
+        return;
+      }
+
+      select.innerHTML =
+        '<option value="">-- Pilih Kegiatan --</option>';
+
+      (hasil.data || []).forEach(function(item) {
+        const option = document.createElement('option');
+        option.value = item.idKegiatan;
+        option.textContent =
+          item.tahun + ' | ' +
+          item.namaKegiatan + ' | ' +
+          item.kabupatenKota;
+        select.appendChild(option);
+      });
+
+      if (!hasil.data || !hasil.data.length) {
+        select.innerHTML =
+          '<option value="">Belum ada kegiatan disetujui</option>';
+      }
+    },
+    function(error) {
+      select.innerHTML =
+        '<option value="">Gagal memuat kegiatan</option>';
+      console.error(error);
+    }
+  );
+}
+
+
+function simpanRealisasiDashboardPTLK() {
+  const idKegiatan = el('pelaksanaanIdKegiatan').value;
+
+  if (!idKegiatan) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  const data = {
+    idKegiatan: idKegiatan,
+    outputRealisasi:
+      Number(el('pelaksanaanOutput').value || 0),
+    anggaranRealisasi:
+      Number(el('pelaksanaanAnggaran').value || 0),
+    persentaseFisik:
+      Number(el('pelaksanaanFisik').value || 0),
+    persentaseKeuangan:
+      Number(el('pelaksanaanKeuangan').value || 0),
+    statusPelaksanaan:
+      el('pelaksanaanStatus').value,
+    tautanBukti:
+      el('pelaksanaanBukti').value.trim(),
+    tanggalLaporan:
+      el('pelaksanaanTanggal').value,
+    catatan:
+      el('pelaksanaanCatatan').value.trim()
+  };
+
+  const status = el('statusPelaksanaanRealisasi');
+  status.textContent = 'Sedang menyimpan realisasi...';
+
+  callServer(
+    'simpanRealisasiKegiatanPTLK',
+    [TOKEN_LOGIN, data],
+    function(hasil) {
+      status.textContent =
+        hasil && hasil.ok
+          ? 'Realisasi berhasil disimpan.'
+          : 'Penyimpanan gagal: ' +
+            (hasil && hasil.pesan
+              ? hasil.pesan
+              : JSON.stringify(hasil));
+
+      if (hasil && hasil.ok) {
+        muatRealisasiDashboardPTLK();
+      }
+    },
+    function(error) {
+      status.textContent =
+        'Gagal menyimpan realisasi: ' + error;
+    }
+  );
+}
+
+
+function muatRealisasiDashboardPTLK() {
+  const idKegiatan = el('pelaksanaanIdKegiatan').value;
+
+  if (!idKegiatan) {
+    alert('Pilih kegiatan terlebih dahulu.');
+    return;
+  }
+
+  const area = el('hasilPembacaanRealisasi');
+  const status = el('statusPelaksanaanRealisasi');
+
+  area.textContent = 'Sedang membaca data realisasi...';
+
+  callServer(
+    'ambilRealisasiKegiatanPTLK',
+    [TOKEN_LOGIN, idKegiatan],
+    function(hasil) {
+      area.textContent = JSON.stringify(hasil, null, 2);
+
+      if (status) {
+        status.textContent =
+          hasil && hasil.ok
+            ? 'Data realisasi berhasil dibaca.'
+            : 'Pembacaan realisasi gagal.';
+      }
+
+      if (hasil && hasil.ok && hasil.data) {
+        const d = hasil.data;
+
+        el('pelaksanaanOutput').value =
+          d.outputRealisasi ?? '';
+
+        el('pelaksanaanAnggaran').value =
+          d.anggaranRealisasi ?? '';
+
+        el('pelaksanaanFisik').value =
+          d.persentaseFisik ?? '';
+
+        el('pelaksanaanKeuangan').value =
+          d.persentaseKeuangan ?? '';
+
+        el('pelaksanaanStatus').value =
+          d.statusPelaksanaan || 'BELUM DIMULAI';
+
+        el('pelaksanaanTanggal').value =
+          d.tanggalLaporan || '';
+
+        el('pelaksanaanBukti').value =
+          d.tautanBukti || '';
+
+        el('pelaksanaanCatatan').value =
+          d.catatan || '';
+      }
+    },
+    function(error) {
+      area.textContent =
+        'GAGAL MEMBACA REALISASI:\n' + error;
+    }
+  );
+}
+
+/* Muat daftar kegiatan saat Dashboard siap */
+document.addEventListener('DOMContentLoaded', function() {
+  muatPilihanKegiatanPelaksanaanPTLK();
+});
+
+
+function muatPilihanKegiatanMonevPTLK() {
+  const select = el('monevKegiatanId');
+
+  if (!select) {
+    console.error('Elemen monevKegiatanId tidak ditemukan.');
+    return;
+  }
+
+  if (!TOKEN_LOGIN) {
+    select.innerHTML =
+      '<option value="">Token login belum tersedia</option>';
+    return;
+  }
+
+  select.innerHTML =
+    '<option value="">Memuat daftar kegiatan...</option>';
+
+  callServer(
+    'ambilDaftarKegiatanDisetujuiPTLK',
+    [TOKEN_LOGIN, {}],
+
+    function(hasil) {
+      console.log('HASIL KEGIATAN MONEV:', hasil);
+
+      if (!hasil || !hasil.ok) {
+        select.innerHTML =
+          '<option value="">Gagal memuat kegiatan</option>';
+        console.error(hasil);
+        return;
+      }
+
+      DATA_KEGIATAN_MONEV_PTLK = hasil.data || [];
+
+      select.innerHTML =
+        '<option value="">-- Pilih Kegiatan --</option>';
+
+      DATA_KEGIATAN_MONEV_PTLK.forEach(function(item) {
+        const option = document.createElement('option');
+        option.value = item.idKegiatan;
+        option.textContent =
+          item.tahun + ' | ' +
+          item.namaKegiatan + ' | ' +
+          item.kabupatenKota;
+
+        select.appendChild(option);
+      });
+
+      if (DATA_KEGIATAN_MONEV_PTLK.length === 0) {
+        select.innerHTML =
+          '<option value="">Belum ada kegiatan disetujui</option>';
+      }
+    },
+
+    function(error) {
+      console.error('ERROR MONEV:', error);
+      select.innerHTML =
+        '<option value="">Gagal memuat kegiatan</option>';
+    }
+  );
+}
+
+
+
+function aturTampilanBerdasarkanPeranPTLK() {
+  if (PERAN_PENGGUNA !== 'OPERATOR_KABKOTA') return;
+
+  var panelTerlarang = [
+    'panelUjiKoneksiPerencanaanPTLK',
+    'panelPelaksanaanRealisasiPTLK',
+    'panelDaftarSeluruhRencana',
+    'panelPersetujuanRencana',
+    'panelRencanaDitolak',
+    'panelOperator',
+    'panelKelolaOperator'
+  ];
+
+  panelTerlarang.forEach(function(id) {
+    var panel = document.getElementById(id);
+    if (panel) panel.style.display = 'none';
+  });
+
+  var judulTerlarang = [
+    'Ringkasan Data',
+    'Persebaran Data per Kabupaten/Kota',
+    'Rekapitulasi 10 OPK',
+    'Status Verifikasi',
+    'Rincian Data Hasil Filter'
+  ];
+
+  document.querySelectorAll('section.panel').forEach(function(panel) {
+    var h2 = panel.querySelector('h2');
+    if (h2 && judulTerlarang.indexOf(h2.textContent.trim()) !== -1) {
+      panel.style.display = 'none';
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener(
+    'DOMContentLoaded',
+    aturTampilanBerdasarkanPeranPTLK
+  );
+} else {
+  aturTampilanBerdasarkanPeranPTLK();
+}
+
+</script>
+</body>
+</html>
